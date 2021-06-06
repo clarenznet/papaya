@@ -1,42 +1,36 @@
+import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:papaya/onboarding/pageOne.dart';
+import 'package:papaya/screens/main_screen.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 
-import 'screens/main_screen.dart';
-import 'package:papaya/homePage.dart';
-import 'signUpPage.dart';
-import 'package:mpesa_flutter_plugin/mpesa_flutter_plugin.dart';
-//void main() => runApp(MyApp());
-void main() async {
-  MpesaFlutterPlugin.setConsumerKey("GmF0l26wLvGHA0wDwTeZSoNdVp8VZQmU");
-  MpesaFlutterPlugin.setConsumerSecret("AFIrVoUgIvSMlRv7");
-
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-//      debugShowCheckedModeBanner: false,
-//      title: 'Homlie',
-      //home: MainScreen(),
-//      home: MyHomePage(title: 'Phone Authentication'),
-      //home: SignUpPage(),
         debugShowCheckedModeBanner: false,
         home: StreamBuilder(
           stream: FirebaseAuth.instance.onAuthStateChanged,
           builder: (ctx, userSnapshot) {
             if (userSnapshot.hasData) {
-              return HomePage();
+              debugPrint("USERSNAPSHOT>" + userSnapshot.toString());
+            return MainScreen();
             } else if (userSnapshot.hasError) {
               return CircularProgressIndicator();
             }
-            return MainScreen();
+            return  PageOne();
           },
         )
-
     );
   }
 }
+

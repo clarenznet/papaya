@@ -6,12 +6,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:papaya/widgets/heading.dart';
 import 'package:papaya/widgets/dashed_rect.dart';
 import 'dart:math' as math;
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import '../main.dart';
+
 class ActivityPage extends StatefulWidget {
-  ActivityPage() : super();
+  //ActivityPage() : super();
+
+//  final FirebaseUser user;
+
+  //ActivityPage({this.user}) : super();
 
   @override
   ListViewActivity createState() {
@@ -21,14 +26,37 @@ class ActivityPage extends StatefulWidget {
 
 class ListViewActivity extends State<ActivityPage> {
   var isLoading = false;
+  //final FirebaseUser user;
 
-  Future<void> _logout() async {
-    try {
-      await FirebaseAuth.instance.signOut();
-    } catch (e) {
-      print(e.toString());
-    }
+//  ListViewActivity({this.user});
+  FirebaseAuth _auth = FirebaseAuth.instance;
+
+  signOut() async {
+    await _auth.signOut();
+   // Provider.of<Auth>(context).signOut();
   }
+  Future<void> _logout() async {
+    await _auth.signOut().catchError((error){
+      print(error.toString());
+    });
+//    Navigator.push(context, MaterialPageRoute(builder: (context) => MyApp()));
+    Navigator.pushAndRemoveUntil<dynamic>(
+      context,
+      MaterialPageRoute<dynamic>(
+        builder: (BuildContext context) => MyApp(),
+      ),
+          (route) => false,//if you want to disable back feature set to false
+    );
+
+
+  }
+  // Future<void> _logout() async {
+  //   try {
+  //     await FirebaseAuth.instance.signOut();
+  //   } catch (e) {
+  //     print(e.toString());
+  //   }
+  // }
   // AboutListTile(
   // icon: Icon(Icons.info,),
   // child: Text('About app'),
@@ -315,13 +343,59 @@ class ListViewActivity extends State<ActivityPage> {
                                     button: DottedBorder(
                                         borderType: BorderType.RRect,
                                         radius: Radius.circular(8),
-                                        color: Colors.grey,
+                                        color: Colors.lightBlue,
                                         child: Center(
-                                          child: Icon(
-                                            Icons.more_vert,
-                                            size: 28,
-                                            color: Colors.lightBlue,
-                                          ),
+                                          child: PopupMenuButton(
+                                              //Icons.more_vert,
+                                             // size: 28,
+                                               //color: Colors.lightBlue,
+
+                                          onSelected: (value) {
+                                            if (value==3)  _logout();
+                                            debugPrint("RPressed>>" + value.toString());
+                                              },
+                                              itemBuilder: (context) => [
+                                                PopupMenuItem(
+                                                    value: 1,
+                                                    child: Row(
+                                                      children: <Widget>[
+                                                        Padding(
+                                                          padding: const EdgeInsets.all(5),
+                                                          child: Icon(Icons.help_outline_rounded),
+                                                        ),
+                                                        Text("Help")
+                                                      ],
+                                                    )),
+                                                PopupMenuItem(
+                                                    value: 2,
+                                                    child: Row(
+                                                      children: <Widget>[
+                                                        Padding(
+                                                          padding: const EdgeInsets.all(5),
+                                                          child: Icon(Icons.share),
+                                                        ),
+                                                        Text("Share")
+                                                      ],
+                                                    )),
+                                                PopupMenuItem(
+                                                    value: 3,
+                                                    child: Row(
+                                                      children: <Widget>[
+                                                        Padding(
+                                                          padding: const EdgeInsets.all(5),
+                                                          child: Icon(Icons.logout),
+                                                        ),
+                                                        Text("Log out")
+                                                      ],
+                                                    )),
+                                              ]),
+                                          // child: Icon(
+                                          //   Icons.more_vert,
+                                          //   size: 28,
+                                          //   color: Colors.lightBlue,
+                                          //
+                                          // ),
+
                                         ),
                                         strokeWidth: 1,
                                         dashPattern: [3, 4]),

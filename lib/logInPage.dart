@@ -2,17 +2,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:papaya/main.dart';
 import 'package:papaya/screens/main_screen.dart';
-import 'package:papaya/logInPage.dart';
 import 'package:papaya/signUpPage.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 
-class SignUpPage extends StatefulWidget {
-  SignUpPage({Key key, this.title}) : super(key: key);
+class LogInPage extends StatefulWidget {
+  LogInPage({Key key, this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _SignUpPageState createState() => _SignUpPageState();
+  _LogInPageState createState() => _LogInPageState();
 
 }
 final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -23,17 +22,16 @@ final TextEditingController _phoneNumberController = TextEditingController();
 final TextEditingController _smsController = TextEditingController();
 String _verificationId;
 final SmsAutoFill _autoFill = SmsAutoFill();
-class _SignUpPageState extends State<SignUpPage> {
+class _LogInPageState extends State<LogInPage> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  // String strPhoneNumber="";
-  bool blVerificationCode=false;
-
+ // String strPhoneNumber="";
+bool blVerificationCode=false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
-      resizeToAvoidBottomInset: false,
-      body: SingleChildScrollView(
+    key: _scaffoldKey,
+    resizeToAvoidBottomInset: false,
+    body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -41,47 +39,23 @@ class _SignUpPageState extends State<SignUpPage> {
               height: MediaQuery.of(context).size.height * 0.2,
             ),
             Text(
-              "Homlie Sign Up",
+              "Homlie Log In",
               style: TextStyle(
                 color: Colors.cyan,
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
               ),
             ),
-
-      Visibility(
-        visible: blVerificationCode == true
-            ? false
-            : true,
-        child:Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: TextField(
-                keyboardType: TextInputType.text,
-                decoration: new InputDecoration(
-                    border: new OutlineInputBorder(
-                      borderRadius: const BorderRadius.all(
-                        const Radius.circular(30),
-                      ),
-                    ),
-                    filled: true,
-                    prefixIcon: Icon(
-                      Icons.text_fields_sharp,
-                      color: Colors.cyan,
-                    ),
-                    hintStyle: new TextStyle(color: Colors.grey[800]),
-                    hintText: "Enter your name",
-                    fillColor: Colors.white70),
-                onChanged: (value) {
-//                  strEmail = value;
-                },
-              ),
-
-            ),),
-      Visibility(
-        visible: blVerificationCode == true
-            ? false
-            : true,
-        child:Padding(
+            Image.network(
+              "https://homlie.co.ke/img/favicon.png",
+              height: 150,
+            ),
+            Visibility(
+              visible: blVerificationCode == true
+                  ? false
+                  : true,
+              child:
+            Padding(
               padding: const EdgeInsets.all(16.0),
               child: TextField(
                 keyboardType: TextInputType.emailAddress,
@@ -105,11 +79,11 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
 
             ),),
-      Visibility(
-        visible: blVerificationCode == true
-            ? false
-            : true,
-        child:ListTile(
+            Visibility(
+              visible: blVerificationCode == true
+                  ? false
+                  : true,
+              child:ListTile(
               title: TextField(
                 controller: _phoneNumberController,
 //                decoration: const InputDecoration(labelText: 'Phone number (+xx xxx-xxx-xxxx)'),
@@ -129,8 +103,8 @@ class _SignUpPageState extends State<SignUpPage> {
                     hintStyle: new TextStyle(color: Colors.grey[800]),
                     hintText: "Enter your phone Number e.g +254xxxxxxxxx",
                     fillColor: Colors.white70),
-                // onChanged: (value) {
-                // strPhoneNumber = value;
+               // onChanged: (value) {
+                 // strPhoneNumber = value;
                 //},
               ),
               trailing: IconButton(
@@ -144,8 +118,8 @@ class _SignUpPageState extends State<SignUpPage> {
                   _phoneNumberController.text = await _autoFill.hint
                 },
               ),
-            ),
-      ),
+              ),
+    ),
 
       Visibility(
         visible: blVerificationCode == true
@@ -154,13 +128,11 @@ class _SignUpPageState extends State<SignUpPage> {
         child:Container(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               alignment: Alignment.center,
-              width: double.infinity,
               child: RaisedButton(
-
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30)),
                 color: Colors.cyan,
-                child: Text("Sign up with Phone Number"),
+                child: Text("Log in with Phone Number"),
                 onPressed: () async {
                   verifyPhoneNumber();
                 },
@@ -169,86 +141,87 @@ class _SignUpPageState extends State<SignUpPage> {
             SizedBox(
               height: 10.0,
             ),
-
       Visibility(
         visible: blVerificationCode == true
             ? false
             : true,
-        child:Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 10.0),
+
+             child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10.0),
+                  child: Text(
+                    "No Account?",
+                  )),),
+      Visibility(
+        visible: blVerificationCode == true
+            ? false
+            : true,
+
+    child: InkWell(
                 child: Text(
-                  "Already have an account with us?",
-                )),),
-      Visibility(
-        visible: blVerificationCode == true
-            ? false
-            : true,
-        child:InkWell(
-              child: Text(
-                'Log in',
-                style: TextStyle(
-                  color: Colors.cyan,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-
-              ),
-              onTap: () => {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => LogInPage(),
-
+                  'Sign up',
+                  style: TextStyle(
+                    color: Colors.cyan,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
                   ),
-                )
-              },
-            ),),
 
+                ),
+                onTap: () => {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SignUpPage(),
+
+                    ),
+                  )
+                },
+              ),
+      ),
 
             SizedBox(
               height: 20,
             ),
-            Visibility(
-              visible: blVerificationCode,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: TextField(
-                  controller: _smsController,
-                  keyboardType: TextInputType.number,
-                  decoration: new InputDecoration(
-                      border: new OutlineInputBorder(
-                        borderRadius: const BorderRadius.all(
-                          const Radius.circular(30),
-                        ),
+      Visibility(
+        visible: blVerificationCode,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                controller: _smsController,
+                keyboardType: TextInputType.number,
+                decoration: new InputDecoration(
+                    border: new OutlineInputBorder(
+                      borderRadius: const BorderRadius.all(
+                        const Radius.circular(30),
                       ),
-                      filled: true,
-                      prefixIcon: Icon(
-                        Icons.keyboard,
-                        color: Colors.cyan,
-                      ),
-                      hintStyle: new TextStyle(color: Colors.grey[800]),
-                      hintText: "Verification code",
-                      fillColor: Colors.white70),
-                ),
-
+                    ),
+                    filled: true,
+                    prefixIcon: Icon(
+                      Icons.keyboard,
+                      color: Colors.cyan,
+                    ),
+                    hintStyle: new TextStyle(color: Colors.grey[800]),
+                    hintText: "Verification code",
+                    fillColor: Colors.white70),
               ),
+
             ),
+      ),
             Visibility(
               visible: blVerificationCode,
-              child:Container(
-              padding: const EdgeInsets.only(top: 16.0),
-              alignment: Alignment.center,
-              child: RaisedButton(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30)),
-                  color: Colors.cyan,
-                  onPressed: () async {
-                    signInWithPhoneNumber();
-                  },
-                  child: Text("Verify")),
-            ),),
-
+             child: Container(
+            padding: const EdgeInsets.only(top: 16.0),
+            alignment: Alignment.center,
+            child: RaisedButton(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)),
+                color: Colors.cyan,
+            onPressed: () async {
+            signInWithPhoneNumber();
+            },
+            child: Text("Verify")),
+            ),
+    ),
 
             // Text(
             //   authStatus == "" ? "" : authStatus,
@@ -277,8 +250,7 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
             (route) => false,//if you want to disable back feature set to false
       );
-
-        };
+    };
     PhoneVerificationFailed verificationFailed =
         (FirebaseAuthException authException) {
       showSnackbar('Phone number verification failed. Code: ${authException.code}. Message: ${authException.message}');
@@ -291,7 +263,7 @@ class _SignUpPageState extends State<SignUpPage> {
       setState(() {
         blVerificationCode = true;
       });
-     };
+    };
     PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout =
         (String verificationId) {
       showSnackbar("verification code: " + verificationId);
@@ -323,13 +295,14 @@ class _SignUpPageState extends State<SignUpPage> {
       debugPrint("UID>" + user.uid);
 
       if (user.uid!=null)
-        Navigator.pushAndRemoveUntil<dynamic>(
-          context,
-          MaterialPageRoute<dynamic>(
-            builder: (BuildContext context) => MyApp(),
-          ),
-              (route) => false,//if you want to disable back feature set to false
-        );
+      Navigator.pushAndRemoveUntil<dynamic>(
+        context,
+        MaterialPageRoute<dynamic>(
+          builder: (BuildContext context) => MyApp(),
+        ),
+            (route) => false,//if you want to disable back feature set to false
+      );
+
     } catch (e) {
       showSnackbar("Failed to sign in: " + e.toString());
     }

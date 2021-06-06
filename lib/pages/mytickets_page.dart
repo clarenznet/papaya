@@ -68,13 +68,10 @@ class ListViewActivity extends State<MyTicketsPage> {
   void initState() {
     super.initState();
   }
-
   //////////////////////////////////////////notifsa items
-
   @override
   Widget build(BuildContext context) {
     var rng = new math.Random.secure();
-
     return Scaffold(
         body: WillPopScope(
             onWillPop: _onWillPop,
