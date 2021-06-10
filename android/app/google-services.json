@@ -45,12 +45,49 @@
     },
     {
       "client_info": {
+        "mobilesdk_app_id": "1:844032974944:android:5cd016ae99bc0dcff86305",
+        "android_client_info": {
+          "package_name": "com.lns.guavafirebaseloginauth"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "844032974944-gcrc0fl18af8lb90dh26t313tk0838r0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZUcfDe0JTPcCKUq6FLgygtj4lXoWj0cQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "844032974944-gcrc0fl18af8lb90dh26t313tk0838r0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:844032974944:android:bb66cf81931a79def86305",
         "android_client_info": {
           "package_name": "com.lns.papaya"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "844032974944-04kme2c1lu86vigpgvko1llin87f3ppj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lns.papaya",
+            "certificate_hash": "0929bc0b34608d5d5955f3d94a4302f9f4a2a6cd"
+          }
+        },
         {
           "client_id": "844032974944-gcrc0fl18af8lb90dh26t313tk0838r0.apps.googleusercontent.com",
           "client_type": 3

@@ -8,10 +8,12 @@ import 'package:papaya/widgets/dashed_rect.dart';
 import 'dart:math' as math;
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
+import 'package:firebase_messaging/firebase_messaging.dart';
 import '../main.dart';
+import 'package:flushbar/flushbar.dart';
 
 class ActivityPage extends StatefulWidget {
+
   //ActivityPage() : super();
 
 //  final FirebaseUser user;
@@ -25,6 +27,37 @@ class ActivityPage extends StatefulWidget {
 }
 
 class ListViewActivity extends State<ActivityPage> {
+  String _message = '';
+
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
+  _register() {
+    _firebaseMessaging.getToken().then((token) => print(token));
+  }
+
+  // @override
+  // void initState() {
+  //   // TODO: implement initState
+  //   super.initState();
+  // }
+
+  void getMessage(){
+    _firebaseMessaging.configure(
+        onMessage: (Map<String, dynamic> message) async {
+          print('on message $message');
+          setState(() => _message = message["notification"]["title"]);
+        }, onResume: (Map<String, dynamic> message) async {
+      print('on resume $message');
+      setState(() => _message = message["notification"]["title"]);
+    }, onLaunch: (Map<String, dynamic> message) async {
+      print('on launch $message');
+      setState(() => _message = message["notification"]["title"]);
+    });
+  }
+
+
+
+/////////////////////////////////////////////////
   var isLoading = false;
   //final FirebaseUser user;
 
@@ -33,13 +66,14 @@ class ListViewActivity extends State<ActivityPage> {
 
   signOut() async {
     await _auth.signOut();
-   // Provider.of<Auth>(context).signOut();
+    // Provider.of<Auth>(context).signOut();
   }
   Future<void> _logout() async {
     await _auth.signOut().catchError((error){
       print(error.toString());
     });
-//    Navigator.push(context, MaterialPageRoute(builder: (context) => MyApp()));
+    final db = await SqliteDB().db;
+    db.delete("loginUser");
     Navigator.pushAndRemoveUntil<dynamic>(
       context,
       MaterialPageRoute<dynamic>(
@@ -47,8 +81,6 @@ class ListViewActivity extends State<ActivityPage> {
       ),
           (route) => false,//if you want to disable back feature set to false
     );
-
-
   }
   // Future<void> _logout() async {
   //   try {
@@ -143,22 +175,6 @@ class ListViewActivity extends State<ActivityPage> {
     true
   ];
 /////////////////////////////sglite functions
-  /// Add user to the table
-  Future putUser() async {
-    /// User data
-    dynamic user = {
-      "id": "johndoe94",
-      "name": "John Doe",
-      "email": "abcd@example.com",
-      "age": 26
-    };
-
-    /// Adds user to table
-    final dbClient = await SqliteDB().db;
-    int res = await dbClient.insert("User", user);
-    return res;
-  }
-
 
   ////////////////////////////////
   /// Get all users using raw query
@@ -167,13 +183,47 @@ class ListViewActivity extends State<ActivityPage> {
     final res = await dbClient.rawQuery("SELECT * FROM User2 ORDER BY notif_id DESC");
     return res;
   }
+  /// Simple query with WHERE raw query
+  Future getLoginUserData() async {
+    var dbClient = await SqliteDB().db;
+    //final res = await dbClient.rawQuery("SELECT fuid,email FROM loginUser");
+    final res = await dbClient.rawQuery("SELECT fuid,email, phonenumber,generallocation,latlongaddress FROM loginUser");
+    Flushbar(
+      title: "Logged In User Info",
+      message: ""+res.toString(),
+      duration: Duration(seconds: 10),
+      isDismissible: false,
+    )
+      ..show(context);
+    return res;
+  }
+  // Future getLoginUserData() async {
+  //   var dbClient = await SqliteDB().db;
+  //   final res = await dbClient.rawQuery("SELECT * FROM loginUser");
+  //   Flushbar(
+  //     title: "Logged In User Info",
+  //     message: ""+res.toString(),
+  //     duration: Duration(seconds: 10),
+  //     isDismissible: false,
+  //   )
+  //     ..show(context);
+  //   return res;
+  // }
 
   /// Simple query with WHERE raw query
   Future getAdults() async {
     var dbClient = await SqliteDB().db;
     final res = await dbClient.rawQuery("SELECT id, name FROM User WHERE age > 18");
+    Flushbar(
+      title: "Logged In User Info",
+      message: ""+res.toString(),
+      duration: Duration(seconds: 10),
+      isDismissible: false,
+    )
+      ..show(context);
     return res;
   }
+
 
   /// Get all using sqflite helper
   Future getAllUsingHelper() async{
@@ -297,10 +347,23 @@ class ListViewActivity extends State<ActivityPage> {
   @override
   void initState() {
     super.initState();
+    getLoginUserData();
     getData();
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _refreshIndicatorKey.currentState.show());
-
+    getMessage();
+    final fbm = FirebaseMessaging();
+    fbm.requestNotificationPermissions();
+    fbm.configure(onMessage: (msg) {
+      print(msg);
+      return;
+    }, onLaunch: (msg) {
+      print(msg);
+      return;
+    }, onResume: (msg) {
+      print(msg);
+      return;
+    });
     // var users = [{"id": "1", "name": "johndoe", "email": "johndoe@gmail.com", "age": 25}, {"id": "2", "name": "Paul", "email": "paul2@gmail.com", "age": 22}];
     // putUsers(users);
     // var notifs =[{"notif_id":590,"user_phonenumber":254775961581,"user_email":"clarenznet@gmail.com","notif_title":"New ticket created.","notif_body":"Laundry request uploaded","notif_metadata":null,"notif_requestid":"AREIPPH","notif_color":0,"notif_time":"2021-05-29 18:17:02"}];
@@ -318,106 +381,106 @@ class ListViewActivity extends State<ActivityPage> {
         body :WillPopScope(
             onWillPop: _onBackPressed,
 
-                          child:  RefreshIndicator(
-        key: _refreshIndicatorKey,
-        onRefresh: getData,
-        child: SingleChildScrollView(
-                              padding: EdgeInsets.fromLTRB(10.0, 40.0, 10.0, 10.0),
-                              scrollDirection: Axis.vertical,
-                              //height: double.infinity,
-                              child:ConstrainedBox(
-                                constraints: BoxConstraints(
-                                //    minHeight: viewportConstraints.maxHeight
-                                ),
-                                child: Column(children: [
-                                  SizedBox(
-                                    height: 22,
-                                  ),
-                                  Heading(
-                                    text: Text(
-                                      "Homlie",
-                                      style: TextStyle(
-                                          fontSize: 32,
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                    button: DottedBorder(
-                                        borderType: BorderType.RRect,
-                                        radius: Radius.circular(8),
-                                        color: Colors.lightBlue,
-                                        child: Center(
-                                          child: PopupMenuButton(
-                                              //Icons.more_vert,
-                                             // size: 28,
-                                               //color: Colors.lightBlue,
+            child:  RefreshIndicator(
+                key: _refreshIndicatorKey,
+                onRefresh: getData,
+                child: SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(10.0, 40.0, 10.0, 10.0),
+                    scrollDirection: Axis.vertical,
+                    //height: double.infinity,
+                    child:ConstrainedBox(
+                      constraints: BoxConstraints(
+                        //    minHeight: viewportConstraints.maxHeight
+                      ),
+                      child: Column(children: [
+                        SizedBox(
+                          height: 22,
+                        ),
+                        Heading(
+                          text: Text(
+                            "Homlie",
+                            style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.w600),
+                          ),
+                          button: DottedBorder(
+                              borderType: BorderType.RRect,
+                              radius: Radius.circular(8),
+                              color: Colors.lightBlue,
+                              child: Center(
+                                child: PopupMenuButton(
+                                  //Icons.more_vert,
+                                  // size: 28,
+                                  //color: Colors.lightBlue,
 
-                                          onSelected: (value) {
-                                            if (value==3)  _logout();
-                                            debugPrint("RPressed>>" + value.toString());
-                                              },
-                                              itemBuilder: (context) => [
-                                                PopupMenuItem(
-                                                    value: 1,
-                                                    child: Row(
-                                                      children: <Widget>[
-                                                        Padding(
-                                                          padding: const EdgeInsets.all(5),
-                                                          child: Icon(Icons.help_outline_rounded),
-                                                        ),
-                                                        Text("Help")
-                                                      ],
-                                                    )),
-                                                PopupMenuItem(
-                                                    value: 2,
-                                                    child: Row(
-                                                      children: <Widget>[
-                                                        Padding(
-                                                          padding: const EdgeInsets.all(5),
-                                                          child: Icon(Icons.share),
-                                                        ),
-                                                        Text("Share")
-                                                      ],
-                                                    )),
-                                                PopupMenuItem(
-                                                    value: 3,
-                                                    child: Row(
-                                                      children: <Widget>[
-                                                        Padding(
-                                                          padding: const EdgeInsets.all(5),
-                                                          child: Icon(Icons.logout),
-                                                        ),
-                                                        Text("Log out")
-                                                      ],
-                                                    )),
-                                              ]),
-                                          // child: Icon(
-                                          //   Icons.more_vert,
-                                          //   size: 28,
-                                          //   color: Colors.lightBlue,
-                                          //
-                                          // ),
+                                    onSelected: (value) {
+                                      if (value==3)  _logout();
+                                      debugPrint("RPressed>>" + value.toString());
+                                    },
+                                    itemBuilder: (context) => [
+                                      PopupMenuItem(
+                                          value: 1,
+                                          child: Row(
+                                            children: <Widget>[
+                                              Padding(
+                                                padding: const EdgeInsets.all(5),
+                                                child: Icon(Icons.help_outline_rounded),
+                                              ),
+                                              Text("Help")
+                                            ],
+                                          )),
+                                      PopupMenuItem(
+                                          value: 2,
+                                          child: Row(
+                                            children: <Widget>[
+                                              Padding(
+                                                padding: const EdgeInsets.all(5),
+                                                child: Icon(Icons.share),
+                                              ),
+                                              Text("Share")
+                                            ],
+                                          )),
+                                      PopupMenuItem(
+                                          value: 3,
+                                          child: Row(
+                                            children: <Widget>[
+                                              Padding(
+                                                padding: const EdgeInsets.all(5),
+                                                child: Icon(Icons.logout),
+                                              ),
+                                              Text("Log out")
+                                            ],
+                                          )),
+                                    ]),
+                                // child: Icon(
+                                //   Icons.more_vert,
+                                //   size: 28,
+                                //   color: Colors.lightBlue,
+                                //
+                                // ),
 
-                                        ),
-                                        strokeWidth: 1,
-                                        dashPattern: [3, 4]),
-                                  ),
-                                  Heading(
-                                    text: Text(
-                                      "You have "+strNoOfNotifs+" notifications",
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.grey[500]),
-                                    ),
-                                  ),
-                                    FutureBuilder(
-                                          future: getAll(),//getData(),
-                                          builder: (context, snapshot) {
-                                            if (snapshot.hasError) print(snapshot.error);
-                                            return snapshot.hasData
-                                                ? LayoutBuilder(
-                                              builder: (BuildContext context, BoxConstraints viewportConstraints) {
-                                                List lstNotificationsData = snapshot.data;
-                                                strNoOfNotifs=lstNotificationsData.length.toString();//setState(() => strNoOfNotifs=lstNotificationsData.length.toString());
+                              ),
+                              strokeWidth: 1,
+                              dashPattern: [3, 4]),
+                        ),
+                        Heading(
+                          text: Text(
+                            "You have "+strNoOfNotifs+" notifications",
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[500]),
+                          ),
+                        ),
+                        FutureBuilder(
+                            future: getAll(),//getData(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasError) print(snapshot.error);
+                              return snapshot.hasData
+                                  ? LayoutBuilder(
+                                builder: (BuildContext context, BoxConstraints viewportConstraints) {
+                                  List lstNotificationsData = snapshot.data;
+                                  strNoOfNotifs=lstNotificationsData.length.toString();//setState(() => strNoOfNotifs=lstNotificationsData.length.toString());
                                   return Container(
                                       child: ListView.builder(
                                         itemCount: snapshot.data.length,
@@ -426,7 +489,7 @@ class ListViewActivity extends State<ActivityPage> {
                                         shrinkWrap: true,
                                         //physics: PageScrollPhysics(), // this is what you are looking for
                                         scrollDirection: Axis.vertical,
-                                       physics:NeverScrollableScrollPhysics(),
+                                        physics:NeverScrollableScrollPhysics(),
 //                                        scrollDirection: Axis.vertical,
                                         //NeverScrollableScrollPhysics()                             //height: double.infinity,
 
@@ -545,32 +608,32 @@ class ListViewActivity extends State<ActivityPage> {
 
                                   );
                                   //////////
-                          /////
-                        },
-                      )
-                          : Center(
-                          child: CircularProgressIndicator());
+                                  /////
+                                },
+                              )
+                                  : Center(
+                                  child: CircularProgressIndicator());
 
 
-                    }
+                            }
+                        )
+
+                        ///////////////redfgvvvv
+
+                        ///////////
+
+
+
+
+
+                      ]),
+                    )
+
+                  ////////////////////////////////////
+
                 )
 
-            ///////////////redfgvvvv
-
-            ///////////
-
-
-
-
-
-                                ]),
-                              )
-
-                            ////////////////////////////////////
-
-                          )
-
-                          )
+            )
         )
 
 

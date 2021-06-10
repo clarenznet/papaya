@@ -49,6 +49,8 @@ Future countTable() async {
       )""");
     return res;
   }
+
+
   /// An example use of transactions
   /// in sqflite
   Future test() async {
@@ -58,5 +60,22 @@ Future countTable() async {
       await txn.execute("DELETE FROM Posts");
     });
   }
+
+  //////login sAVE
+
+  /// Creates user Table
+  Future createLoginUserTable() async {
+    var dbClient = await SqliteDB().db;
+    var res = await dbClient.execute("""
+      CREATE TABLE login(
+        id TEXT PRIMARY KEY,
+        fuid TEXT,
+        email TEXT,
+        phonenumber TEXT
+      )""");
+    return res;
+  }
+
+
 
 }
