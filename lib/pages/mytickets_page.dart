@@ -1,5 +1,5 @@
 // @dart=2.9
-
+import 'package:papaya/services/initialize_sqlite.dart';
 import 'package:flutter/material.dart';
 import 'package:papaya/screens/details_screen.dart';
 import 'package:papaya/widgets/heading.dart';
@@ -56,10 +56,22 @@ class ListViewActivity extends State<MyTicketsPage> {
     Colors.lightGreen
   ];
 
+  String strLUUserEmail="";
+  /// Simple query with WHERE raw query
+  Future getLoginUserData() async {
+    var dbClient = await SqliteDB().db;
+    //final res = await dbClient.rawQuery("SELECT fuid,email FROM loginUser");
+    final res = await dbClient.rawQuery("SELECT fuid,email, phonenumber,generallocation,latlongaddress FROM loginUser");
+    List<Map> result = await dbClient.rawQuery("SELECT fuid,email, phonenumber,generallocation,latlongaddress FROM loginUser");
+    debugPrint("|||Logged in user" + result[0]["latlongaddress"].toString());
+    strLUUserEmail=result[0]["email"].toString();
+    return result;
+  }
+
   //////////////////////////////////////////mytickets items
   Future getData() async {
-    var url = 'https://homlie.co.ke/malakane_init/hml_getmytickets.php';
-    var response = await http.get(Uri.parse(url));
+    var url = 'https://homlie.co.ke/malakane_init/hml_getmytickets.php?struseremail=';
+    var response = await http.get(Uri.parse(url+strLUUserEmail));
     debugPrint("getres" + response.body);
     return json.decode(response.body);
   }
@@ -67,6 +79,7 @@ class ListViewActivity extends State<MyTicketsPage> {
   @override
   void initState() {
     super.initState();
+    getLoginUserData();
   }
   //////////////////////////////////////////notifsa items
   @override
@@ -364,8 +377,7 @@ class ListViewActivity extends State<MyTicketsPage> {
                                                         ),
                                                       ],
                                                     ),
-                                                      onTap: () => detailScreen(),
-
+                                                      onTap: () => detailScreen(lstMyTicketsData[index]['fr_tcktcode'].toString()),
                                                   ),
                                                 ),
                                               ));
@@ -384,15 +396,11 @@ class ListViewActivity extends State<MyTicketsPage> {
     )
     );
   }
-  void detailScreen(){
+  void detailScreen(String strTckCode){
     Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DetailsScreen(),
-
-      ),
-    );
-
+        context,
+        MaterialPageRoute(
+            builder: (context) => DetailsScreen(strTckCode)));
   }
 
 }

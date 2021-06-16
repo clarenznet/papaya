@@ -4,7 +4,6 @@ import 'package:papaya/main.dart';
 import 'package:papaya/screens/main_screen.dart';
 import 'package:papaya/signUpPage.dart';
 import 'package:sms_autofill/sms_autofill.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:papaya/services/initialize_sqlite.dart';
 import 'package:flushbar/flushbar.dart';
@@ -43,13 +42,13 @@ class _LogInPageState extends State<LogInPage> {
     _firebaseMessaging.getToken().then((token) {
       strToken = token.toString();
       // do whatever you want with the token here
-      Flushbar(
-        title: "FUID messaging",
-        message: ""+strToken,
-        duration: Duration(seconds: 3),
-        isDismissible: false,
-      )
-        ..show(context);
+      // Flushbar(
+      //   title: "FUID messaging",
+      //   message: ""+strToken,
+      //   duration: Duration(seconds: 3),
+      //   isDismissible: false,
+      // )
+      //   ..show(context);
       setState(() {
         strFuid=strToken;
       });
@@ -293,7 +292,6 @@ class _LogInPageState extends State<LogInPage> {
                 padding: const EdgeInsets.all(16.0),
                 //alignment: Alignment.center,
                 child: new MaterialButton(
-
                   child: setUpButtonChild(),
                   onPressed: () async {
                     verifyPhoneNumber();
@@ -465,7 +463,7 @@ class _LogInPageState extends State<LogInPage> {
         (PhoneAuthCredential phoneAuthCredential) async {
       await _auth.signInWithCredential(phoneAuthCredential);
       showSnackbar("Phone number automatically verified and user signed in: ${_auth.currentUser.uid}");
-      putLoginUser(strFuid,_emailController.text,_auth.currentUser.phoneNumber,"","");
+      putLoginUser(strFuid,_emailController.text,_auth.currentUser.phoneNumber,"","-1.38893, 35.8421");
 //      putLoginUser(strFuid,_emailController.text,_auth.currentUser.phoneNumber,"hjghhj2","hgj");
       Navigator.pushAndRemoveUntil<dynamic>(
         context,
@@ -527,7 +525,7 @@ class _LogInPageState extends State<LogInPage> {
           ),
               (route) => false,//if you want to disable back feature set to false
         );
-        putLoginUser(strFuid,_emailController.text,user.phoneNumber,"","");
+        putLoginUser(strFuid,_emailController.text,user.phoneNumber,"","-1.38893, 35.8421");
       }
 
     } catch (e) {

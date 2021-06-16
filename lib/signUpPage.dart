@@ -42,13 +42,13 @@ class _SignUpPageState extends State<SignUpPage> {
     _firebaseMessaging.getToken().then((token) {
       strToken = token.toString();
       // do whatever you want with the token here
-      Flushbar(
-        title: "FUID messaging",
-        message: ""+strToken,
-        duration: Duration(seconds: 3),
-        isDismissible: false,
-      )
-        ..show(context);
+      // Flushbar(
+      //   title: "FUID messaging",
+      //   message: ""+strToken,
+      //   duration: Duration(seconds: 3),
+      //   isDismissible: false,
+      // )
+      //   ..show(context);
       setState(() {
         strFuid=strToken;
       });

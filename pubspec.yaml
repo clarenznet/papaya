@@ -52,7 +52,6 @@ dependencies:
   firebase_auth: ^0.18.1+2
   sms_autofill: ^1.2.6
   firebase_messaging: ^5.0.4
-  shared_preferences: ^0.5.10
 dev_dependencies:
   flutter_test:
     sdk: flutter

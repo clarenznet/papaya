@@ -6,6 +6,7 @@ import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
 import 'package:geocoding/geocoding.dart' as geocode;
 import 'package:flushbar/flushbar.dart';
+import 'package:papaya/services/initialize_sqlite.dart';
 
 class GetPlacePin extends StatefulWidget {
   @override
@@ -15,6 +16,13 @@ class GetPlacePin extends StatefulWidget {
 }
 
 class _GetPlacePinState extends State<GetPlacePin> {
+  Future update(generallocation,latlongaddress, id) async {
+    var dbClient = await SqliteDB().db;
+    var res = await dbClient.rawQuery(""" UPDATE loginUser 
+        SET generallocation = '$generallocation',latlongaddress = '$latlongaddress' WHERE id = '$id'; """);
+    return res;
+  }
+
   GoogleMapController mapController;
   static final LatLng _center = const LatLng(-1.28893, 36.8421);
   final Set<Marker> _markers = {};
@@ -47,6 +55,7 @@ class _GetPlacePinState extends State<GetPlacePin> {
         //title:address,
         icon: BitmapDescriptor.defaultMarker,
       ));
+      update(strLoc,latlang.latitude.toString()+","+latlang.longitude.toString(),"1");
     });
     mapController.animateCamera(
       CameraUpdate.newCameraPosition(
@@ -65,8 +74,8 @@ class _GetPlacePinState extends State<GetPlacePin> {
     // );
     // Scaffold.of(context).showSnackBar(snackBar);
     Flushbar(
-      title: "Use this location?",
-      message: "Please choose a number of laundary items",
+      title: "Location Changed!",
+      message: "new location selected",
       duration: Duration(seconds: 3),
       isDismissible: false,
 
@@ -102,15 +111,18 @@ double lat=-1.28893,long=36.8421;
     }
 
   }
+  String strRawLatLong="";
   void getMyLoc()async{
     _location.onLocationChanged.listen((LocationData currentLocation) {
       print(currentLocation.latitude);
       print(currentLocation.longitude);
       lat=currentLocation.latitude;
       long=currentLocation.longitude;
+      strRawLatLong=currentLocation.latitude.toString()+","+currentLocation.longitude.toString();
       geoloc = new LatLng(currentLocation.latitude, currentLocation.longitude);
       debugPrint("geoloc:" + geoloc.toString());
     });
+    update(strLoc,strRawLatLong,"1");
 
   }
   @override

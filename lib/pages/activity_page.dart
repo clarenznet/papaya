@@ -183,20 +183,37 @@ class ListViewActivity extends State<ActivityPage> {
     final res = await dbClient.rawQuery("SELECT * FROM User2 ORDER BY notif_id DESC");
     return res;
   }
+  String strLUUserEmail="";
   /// Simple query with WHERE raw query
   Future getLoginUserData() async {
     var dbClient = await SqliteDB().db;
     //final res = await dbClient.rawQuery("SELECT fuid,email FROM loginUser");
     final res = await dbClient.rawQuery("SELECT fuid,email, phonenumber,generallocation,latlongaddress FROM loginUser");
-    Flushbar(
-      title: "Logged In User Info",
-      message: ""+res.toString(),
-      duration: Duration(seconds: 10),
-      isDismissible: false,
-    )
-      ..show(context);
-    return res;
+    List<Map> result = await dbClient.rawQuery("SELECT fuid,email, phonenumber,generallocation,latlongaddress FROM loginUser");
+    debugPrint("|||Logged in user" + result[0]["latlongaddress"].toString());
+    strLUUserEmail=result[0]["email"].toString();
+    return result;
   }
+
+  // Map<List, dynamic> _loggedinuserdetails = {
+  // "responseBody": [
+  // {
+  //   "svc_id": 107,
+  //   "svc_article": "Curtain blinder",
+  //   "svc_demographic": "misc",
+  //   "svc_type": "Laundry",
+  // }
+  // ],
+  // };
+  // [
+  //   {
+  //     fuid: eZkylUGfTWuFCjPD6AzIVU:APA91bEihci2qZC4AZeB3mwiOSrSrlw05JRUT3JkCCjwq67kGY6NoDttUOh0XRfCD2nwVWGUW4zHSBqwGRk9AGczljTRwiUS5Zrhi0yUa2LBEBCp0yNpHWnJ9fcXK3LhbhWhL5yDmZum,
+  //     email: clarenznet@gmail.com,
+  //     phonenumber: +254713593916,
+  //     generallocation: Kiambu County,Ruiru,A2,,A2,,Embu - Nairobi Highway,Embu - Nairobi Highway,
+  //     latlongaddress: LatLng(-1.132274809333934, 36.97678327560425)
+  //   }
+  //   ]
   // Future getLoginUserData() async {
   //   var dbClient = await SqliteDB().db;
   //   final res = await dbClient.rawQuery("SELECT * FROM loginUser");
@@ -247,12 +264,6 @@ class ListViewActivity extends State<ActivityPage> {
   /// example :-
   /// var newAge = 28
   /// var id = "johndoe"
-  Future update(newAge, id) async {
-    var dbClient = await SqliteDB().db;
-    var res = await dbClient.rawQuery(""" UPDATE User 
-        SET age = newAge WHERE id = '$id'; """);
-    return res;
-  }
 
   /// Update using sqflite helper
   /// newData example :-
@@ -305,9 +316,11 @@ class ListViewActivity extends State<ActivityPage> {
     setState(() {
       isLoading = true;
     });
+   var url = 'https://homlie.co.ke/malakane_init/hml_getnotifications.php?struseremail=';
+   var response = await http.get(Uri.parse(url+strLUUserEmail));
 
-    var url = 'https://homlie.co.ke/malakane_init/hml_getnotifications.php';
-    var response = await http.get(url);
+//    var url = 'https://homlie.co.ke/malakane_init/hml_getnotifications.php';
+  //  var response = await http.get(url);
     debugPrint("RESULTNET>>" + response.body);
     ///////////
     //return json.decode(response.body);
@@ -349,6 +362,7 @@ class ListViewActivity extends State<ActivityPage> {
     super.initState();
     getLoginUserData();
     getData();
+//    update("Murera","5090","1");
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _refreshIndicatorKey.currentState.show());
     getMessage();
@@ -418,17 +432,6 @@ class ListViewActivity extends State<ActivityPage> {
                                       debugPrint("RPressed>>" + value.toString());
                                     },
                                     itemBuilder: (context) => [
-                                      PopupMenuItem(
-                                          value: 1,
-                                          child: Row(
-                                            children: <Widget>[
-                                              Padding(
-                                                padding: const EdgeInsets.all(5),
-                                                child: Icon(Icons.help_outline_rounded),
-                                              ),
-                                              Text("Help")
-                                            ],
-                                          )),
                                       PopupMenuItem(
                                           value: 2,
                                           child: Row(

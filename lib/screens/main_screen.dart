@@ -52,7 +52,7 @@ class _MainScreenState extends State<MainScreen> {
               title: Text('Activity'),
               activeIcon: Icon(
                 Feather.activity,
-                color: kGoodPurple,
+                color: Colors.cyan,
               ),
             ),
             BottomNavigationBarItem(
@@ -64,7 +64,7 @@ class _MainScreenState extends State<MainScreen> {
               title: Text('Services'),
               activeIcon: const Icon(
                 Icons.add_comment,
-                color: kGoodPurple,
+                color: Colors.cyan,
               ),
             ),
             BottomNavigationBarItem(
@@ -76,7 +76,7 @@ class _MainScreenState extends State<MainScreen> {
               title: Text('My Tickets'),
               activeIcon: Icon(
                 Feather.menu,
-                color: kGoodPurple,
+                color: Colors.cyan,
                 size: 24,
               ),
             ),
@@ -101,10 +101,10 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  void _next() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => DetailsScreen()));
-  }
+//  void _next() {
+  //  Navigator.push(
+    //    context, MaterialPageRoute(builder: (context) => DetailsScreen()));
+  //}
 
   Map<String, WidgetBuilder> _routeBuilders(BuildContext context, int index) {
     return {
@@ -112,7 +112,7 @@ class _MainScreenState extends State<MainScreen> {
         return [
           ActivityPage(),
           ServicesPage(
-            onNext: _next,
+    //        onNext: _next,
           ),
           MyTicketsPage(),
         ].elementAt(index);

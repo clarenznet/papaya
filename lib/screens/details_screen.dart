@@ -5,37 +5,23 @@ import 'dart:convert' show json;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:mpesa_flutter_plugin/mpesa_flutter_plugin.dart';
+import 'dart:async';
+import 'package:http/http.dart' as http;
+
 
 class DetailsScreen extends StatefulWidget {
+  final String strTcktCode;//if you have multiple values add here
+  DetailsScreen(this.strTcktCode, {Key key}): super(key: key);//add also..example this.abc,this...
   @override
-  _DetailsScreenState createState() {
-    return new _DetailsScreenState();
-  }
+  State<StatefulWidget> createState() => _DetailsScreenState();
+  // _DetailsScreenState createState() {
+  //   return new _DetailsScreenState();
+  // }
 }
 
-// class SecretLoader {
-//   final String secretPath;
-//
-//   SecretLoader({this.secretPath});
-//   Future<Secret> load() {
-//     return rootBundle.loadStructuredData<Secret>(this.secretPath,
-//             (jsonStr) async {
-//           final secret = Secret.fromJson(json.decode(jsonStr));
-//           return secret;
-//         });
-//   }
-// }
-// class Secret {
-//   final String apiKey;
-//   Secret({this.apiKey = ""});
-//   factory Secret.fromJson(Map<String, dynamic> jsonMap) {
-//     return new Secret(apiKey: jsonMap["api_key"]);
-//   }
-// }
-
-
 class _DetailsScreenState extends State<DetailsScreen> {
-///////////////////////secrets
+
+  ///////////////////////secrets
   //MpesaFlutterPlugin.setConsumerKey("GmF0l26wLvGHA0wDwTeZSoNdVp8VZQmU");
 //  MpesaFlutterPlugin.setConsumerSecret("AFIrVoUgIvSMlRv7");
 
@@ -48,36 +34,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
     dynamic transactionInitialisation;
     debugPrint("RES__>" +transactionInitialisation.toString());
     try {
-      // transactionInitialisation =
-      // await MpesaFlutterPlugin.initializeMpesaSTKPush(
-      //     businessShortCode: "504628", //504628
-      //     transactionType: TransactionType.CustomerPayBillOnline,//CustomerBuyGoodsOnline,//CustomerPayBillOnline,
-      //     amount: 7,
-      //     partyA: "254713593916",
-      //     partyB: "504628",
-      //     //Lipa na Mpesa Online ShortCode
-      //     callBackURL: Uri(
-      //         scheme: "https",
-      //         host: "www.homlie.co.ke",
-      //         path: "/aqim/callback_url.php?strticketcode=454"),
-      //     //This url has been generated from http://mpesa-requestbin.herokuapp.com/?ref=hackernoon.com for test purposes
-      //     accountReference: "504628",
-      //     phoneNumber: "254713593916",
-      //     baseUri: Uri(scheme: "https", host: "api.safaricom.co.ke"),
-      //     transactionDesc: "HOMLIE tickets",
-      //     passKey: "ba95f91d4c495092444e625821fb00cc5eec70f8a4d64c0fdc95f8c23b501283");
-      // //This passkey has been generated from Test Credentials from Safaricom Portal
-      // debugPrint("RES__>" +transactionInitialisation.toString());
-      // print("TRANSACTION RESULT: " + transactionInitialisation.toString());
-      // // print("TRANSACTION RESULT: " + transactionInitialisation.toString());
-      // //lets print the transaction results to console at this step
-      // return transactionInitialisation;
-      //
-
-      //////////////////////////////////////////////////////////////////////////////////////////////////////
-      // var url = 'https://homlie.co.ke/malakane_init/hml_getmytickets.php';
-      //
-      // //Run it
       const CustomerBuyGoodsOnline="CustomerBuyGoodsOnline";
       transactionInitialisation =
       await MpesaFlutterPlugin.initializeMpesaSTKPush(
@@ -102,8 +58,21 @@ class _DetailsScreenState extends State<DetailsScreen> {
       print("CAUGHT EXCEPTION: " + e.toString());
     }
   }
-    @override
+  int _button_state = 0;
+  Future getData(String strTcktCode) async {
+    var url = 'https://homlie.co.ke/malakane_init/hml_getticketdetails.php?strtcktcode=';
+    var response = await http.get(Uri.parse(url+strTcktCode));
+    debugPrint("getres" + response.body);
+    return json.decode(response.body);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData(widget.strTcktCode);  }
+  @override
   Widget build(BuildContext context) {
+
 //    debugPrint("SECRET_API>>>>" +secret.toString());
     return Scaffold(
         appBar: AppBar(
@@ -112,7 +81,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
           actions: <Widget>[
             IconButton(
                 icon: const Icon(Icons.refresh),
-                tooltip: 'Edit ticket',
+                tooltip: 'refresh',
                 onPressed: () {
                   //_refreshIndicatorKey.currentState.show();
                 }),
@@ -134,21 +103,77 @@ class _DetailsScreenState extends State<DetailsScreen> {
               ),
               margin: EdgeInsets.all(16),
             ),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                //style: ,
-                onPressed: () {
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              //alignment: Alignment.center,
+
+              child: new MaterialButton(
+
+                child: setUpButtonChild(),
+                onPressed: () async {
                   lipaNaMpesa();
-                  },
-                child: Text('INITIATE PAYMENT'),
+                  setState(() {
+                    _button_state = 0;
+//                if (_state == 0) {
+                    animateButton();
+                    //            }
+
+                  });
+                },
+                elevation: 4.0,
+//                minWidth: double.infinity,
+                height: 48.0,
+                color: Colors.cyan,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)),
+
               ),
-              // child: Text("widget"),
             ),
 
           ],
         ),
       ),
     );
+  }
+  Widget setUpButtonChild() {
+
+    if (_button_state == 0) {
+      return new Text(
+        "       Lipa Na Mpesa       ",
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 16.0,
+        ),
+      );
+    } else if (_button_state == 1) {
+      return CircularProgressIndicator(
+        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+      );
+    } else {
+      return  Text(
+        "       Retry      ",
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 16.0,
+        ),
+      );
+    }
+  }
+
+  void animateButton() {
+    setState(() {
+      _button_state = 1;
+    });
+
+    Timer(Duration(milliseconds: 3300), () {
+      setState(() {
+        _button_state = 2;
+      });
+    });
+    Timer(Duration(milliseconds: 15000), () {
+      setState(() {
+        _button_state = 0;
+      });
+    });
   }
 }

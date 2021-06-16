@@ -1,7 +1,8 @@
 // @dart=2.9
 
+import 'dart:ffi';
 import 'dart:ui';
-
+import 'package:papaya/services/initialize_sqlite.dart';
 import 'package:flutter/material.dart';
 import 'package:papaya/const/_const.dart';
 import 'package:papaya/screens/getplacepin.dart';
@@ -597,7 +598,7 @@ class ListViewActivity extends State<LaundryTab> {
                                     color: Colors.lightBlue,
                                   ),
                                   splashColor: Colors.purple,
-                                  onPressed: () => _show(context),
+                                  onPressed: () => getLoginUserData(),
                                 ),
                               ),
                               strokeWidth: 1,
@@ -760,11 +761,110 @@ class ListViewActivity extends State<LaundryTab> {
     });
   }
   int intTotalPrice=0;
-  String strLocAddress="";
+  int _state = 0;
+  String strLocAddress="",strUserEmail="",strUserPhoneNo="",strUserLat="",strUserLong="";
+  LatLng _geoLocCoordinates;//LatLng(0.0,0.0);
+  //LatLng _center = LatLng(-1.38893, 35.8421);
 
   DateTime selectedDate = DateTime.now();
   TimeOfDay time = TimeOfDay.now();
+  String strUserslatLong="";
+  // /// Simple query with WHERE raw query
+  Future getLoginUserData() async {
+    var dbClient = await SqliteDB().db;
+    //final res = await dbClient.rawQuery("SELECT fuid,email FROM loginUser");
+    final res = await dbClient.rawQuery("SELECT fuid,email, phonenumber,generallocation,latlongaddress FROM loginUser");
+    List<Map> result = await dbClient.rawQuery("SELECT fuid,email, phonenumber,generallocation,latlongaddress FROM loginUser");
+    debugPrint("|||Logged in user" + result[0]["latlongaddress"].toString());
+/////
+    setState(() {
+      strUserslatLong=result[0]["latlongaddress"].toString();
+//      if (strUserslatLong=="")strUserslatLong="0,0";
+      strUserEmail=result[0]["email"].toString();
+      strUserPhoneNo=result[0]["phonenumber"].toString();
+      var vLatLong = strUserslatLong.split(',');
+      var llat = double.parse(vLatLong[0]);
+      var llong = double.parse(vLatLong[1]);
+      strUserLat=llat.toString();
+      strUserLong=llong.toString();
+      _geoLocCoordinates = new LatLng(llat, llong);
+
+    });
+    List<geocode.Placemark> placemarks = await geocode.placemarkFromCoordinates(_geoLocCoordinates.latitude,_geoLocCoordinates.longitude);
+    setState(() {
+      strLocAddress=placemarks.first.administrativeArea+","+placemarks.first.locality+","+placemarks.first.street+","+placemarks.first.subLocality+","+placemarks.first.street+","+placemarks.first.subThoroughfare+","+placemarks.first.thoroughfare+","+placemarks.first.name;
+      debugPrint("addreesee111:>" + placemarks.toString());
+    });
+
+    Flushbar(
+      title: "Location",
+      message: _geoLocCoordinates.toString(),
+      duration: Duration(seconds: 3),
+      isDismissible: false,
+    )
+      ..show(context);
+//    return result;
+    _show(context);
+  }
+
   void _show(BuildContext ctx) {
+// //    getLoginUserData();
+//
+//     //googler maps flutter
+     GoogleMapController mapController;
+    final Set<Marker> _markers = {};
+    final LatLng _center = const LatLng(-1.28893, 36.8421);
+    // void _onAddMarkerButtonPressed(LatLng latlang)async {
+    //   setState(() {
+    //     _markers.add(Marker(
+    //       markerId: MarkerId(latlang.toString()),
+    //       position: latlang,
+    //       infoWindow:
+    //       InfoWindow(title: latlang.toString(), snippet: strLocAddress),
+    //       icon: BitmapDescriptor.defaultMarker,
+    //     ));
+    //   });
+    // }
+     void _onAddMarkerButtonPressed (LatLng latlang) async{
+
+       setState(() {
+         _markers.add(Marker(
+           markerId: MarkerId(latlang.toString()),
+           position: latlang,
+           infoWindow:
+           InfoWindow(title: strLocAddress, snippet: "Address"),
+
+           //title:address,
+           icon: BitmapDescriptor.defaultMarker,
+         ));
+       });
+       mapController.animateCamera(
+         CameraUpdate.newCameraPosition(
+           CameraPosition(target: LatLng(latlang.latitude, latlang.longitude),zoom: 15),
+         ),
+       );
+
+     }
+     Set<Marker> markers = Set();
+    void _onCameraMove(CameraPosition position) {
+//      _onAddMarkerButtonPressed(_geoLocCoordinates);
+
+      _geoLocCoordinates = position.target;
+    }
+    void _onMapCreated(GoogleMapController controller) {
+
+      mapController = controller;
+      mapController.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(target: LatLng(_geoLocCoordinates.latitude,_geoLocCoordinates.longitude),zoom: 15),
+        ),
+      );
+      _onAddMarkerButtonPressed(_geoLocCoordinates);
+// Create a new marker
+
+    }
+
+
     _selectDate(ctx) async {
       /// This will be called every time while displaying day in calender.
       bool _decideWhichDayToEnable(DateTime day) {
@@ -786,6 +886,7 @@ class ListViewActivity extends State<LaundryTab> {
       );
       if (picked != null && picked != selectedDate)
         setState(() {
+        //  _onAddMarkerButtonPressed(_geoLocCoordinates);
           selectedDate = picked;
           debugPrint("sel datee>>>>" +
               selectedDate.toString());
@@ -801,6 +902,7 @@ class ListViewActivity extends State<LaundryTab> {
       );
       if(t != null)
         setState(() {
+          //_onAddMarkerButtonPressed(_geoLocCoordinates);
           time = t;
           Navigator.of(context).pop();
           _show(context);
@@ -820,53 +922,14 @@ class ListViewActivity extends State<LaundryTab> {
     }
 
     void getpin(){
-    Navigator.push(
+     //// pop to remove back trace and force user to reload the bottom sheet
+      Navigator.of(context).pop();
+      Navigator.push(
     context,
     MaterialPageRoute(
     builder: (context) => GetPlacePin(),
     ),
     );
-
-    }
-    //googler maps flutter
-    GoogleMapController mapController;
-    final Set<Marker> _markers = {};
-//  static final LatLng _center = const LatLng(-1.28893, 36.8421);
-    LatLng _currentMapPosition = const LatLng(-1.28893, 36.8421);
-    //LatLng geoloc=null;
-
-    final LatLng _center = const LatLng(-1.28893, 36.8421);
-    void _onAddMarkerButtonPressed(LatLng latlang)async {
-      //loadAddress(latlang);
-
-      setState(() {
-        _markers.add(Marker(
-          markerId: MarkerId(_currentMapPosition.toString()),
-          position: latlang,
-          infoWindow:
-          InfoWindow(title: 'Nice Place', snippet: 'Welcome to Poland'),
-
-          //title:address,
-          icon: BitmapDescriptor.defaultMarker,
-        ));
-      });
-      List<geocode.Placemark> placemarks = await geocode.placemarkFromCoordinates(_currentMapPosition.latitude,_currentMapPosition.longitude);
-      strLocAddress=placemarks.first.administrativeArea+","+placemarks.first.locality+","+placemarks.first.street+","+placemarks.first.subLocality+","+placemarks.first.street+","+placemarks.first.subThoroughfare+","+placemarks.first.thoroughfare+","+placemarks.first.name;
-      debugPrint("addreesee111:>" + placemarks.toString());
-
-    }
-    void _onCameraMove(CameraPosition position) {
-      _currentMapPosition = position.target;
-    }
-    void _onMapCreated(GoogleMapController controller) {
-      mapController = controller;
-      mapController.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(target: LatLng(_currentMapPosition.latitude,_currentMapPosition.longitude),zoom: 15),
-        ),
-      );
-      //_onAddMarkerButtonPressed(_currentMapPosition);
-
     }
     snackbarA(String strToast){
       final snackBar = SnackBar(
@@ -883,7 +946,6 @@ class ListViewActivity extends State<LaundryTab> {
       );
       Scaffold.of(ctx).showSnackBar(snackBar);
     }
-
 ///////////////////////
     TextEditingController strHouseNameNo=new TextEditingController();
     /////////
@@ -935,12 +997,12 @@ class ListViewActivity extends State<LaundryTab> {
       if (concatenate.toString().isNotEmpty && concatenate.toString() !="" && strHouseNameNo.text.length>3 && strHouseNameNo.text.isNotEmpty && strHouseNameNo.text !="" && strLocAddress.isNotEmpty){
         var urlPost = 'https://homlie.co.ke/malakane_init/hml_uploadticket.php';
         final strResponse = await http.post(Uri.parse(urlPost), body: {
-          "fr_useremail": "clarenznet@gmail.com", //fr_useremail,
-          "fr_userphone": "+254713593916", //fr_userphone",
+          "fr_useremail": strUserEmail, //fr_useremail,
+          "fr_userphone": strUserPhoneNo, //fr_userphone",
           "fr_funditype": "Laundry", //fr_funditype",
           "fr_generallocation": strLocAddress,
-          "fr_latitude": "52.5356",
-          "fr_longitude": "5.5646",
+          "fr_latitude": strUserLat,
+          "fr_longitude": strUserLong,
           "fr_specificaddress": strHouseNameNo.text,
           "fr_taskdate": strFr_taskdate,
           "fr_tasktime": time.hour.toString() + ":" + time.minute.toString(),
@@ -976,15 +1038,62 @@ class ListViewActivity extends State<LaundryTab> {
     }
 
 
-////////////////////////////////////////////////////////////////
+    Widget setUpButtonChild() {
+      if (_state == 0) {
+        return new Text(
+          "Create Ticket",
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16.0,
+          ),
+        );
+      } else if (_state == 1) {
+        return CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        );
+      } else {
+        return  Text(
+          "Retry creating ticket",
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16.0,
+          ),
+        );
+      }
+    }
 
-    showModalBottomSheet(
+    void animateButton() {
+      setState(() {
+        _state = 1;
+      });
+
+      Timer(Duration(milliseconds: 3300), () {
+        setState(() {
+          _state = 2;
+        });
+      });
+      Timer(Duration(milliseconds: 15000), () {
+        setState(() {
+          _state = 0;
+        });
+      });
+    }
+
+////////////////////////////////////////////////////////////////
+//   getLoginUserData();
+
+
+  //  getLoginUserData();
+  showModalBottomSheet(
         isScrollControlled: true,
 //        height: 10,
         elevation: 5,
         context: ctx,
         //builder: (ctx) =>
         builder: (ctx) {
+
+          //         getLoginUserData();
+//          _onAddMarkerButtonPressed(_geoLocCoordinates);
           return SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(10.0, 40.0, 10.0, 10.0),
               scrollDirection: Axis.vertical,
@@ -1027,7 +1136,6 @@ class ListViewActivity extends State<LaundryTab> {
                   ),
                   Container(
                       child: ListView.builder(
-
                           itemCount: lstSelectedArticles.length,
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
@@ -1035,26 +1143,39 @@ class ListViewActivity extends State<LaundryTab> {
                             return Container(
                                 height: 35,
                                 margin: EdgeInsets.all(2),
-                                child: Text(
-                                  '${lstSelectedArticles[index]['svc_article']} category: ${lstSelectedArticles[index]['svc_demographic']} @ KSh: ${lstSelectedArticles[index]['svc_price']} No of Items: ${lstSelectedArticles[index]['svc_noitemselected']}',
-                                  style: TextStyle(fontSize: 18),
-                                )
+                                child:
+                                ListTile(
+                                  leading: Icon(Icons.add_circle,size: 15.0,color:Colors.lightBlue),
+                                  title: Text(
+                                    '${lstSelectedArticles[index]['svc_article']} (${lstSelectedArticles[index]['svc_demographic']}) ',
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                  ),
+                                  trailing: Text(
+                                    '@ KSh: ${lstSelectedArticles[index]['svc_price']} x ${lstSelectedArticles[index]['svc_noitemselected']}',
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
                             );
-
                           })),
+                  SizedBox(
+                    height: 20,),
+
                   Column(
                       mainAxisAlignment:
                       MainAxisAlignment.start,
                       crossAxisAlignment:
                       CrossAxisAlignment.start,
                       children: <Widget>[
-
+                        SizedBox(
+                          height: 20,),
+                        ListTile(
+                            title:
                         Text(
                           "Total KSh: "+intTotalPrice.toString(),
                           style: TextStyle(
                               fontSize: 21,
                               fontWeight: FontWeight.w500),
-                        ),
+                        ),),
                         SizedBox(
                           height: 20,),
 
@@ -1072,27 +1193,28 @@ class ListViewActivity extends State<LaundryTab> {
 
                         SizedBox(
                           height: 200,
-                          child: GoogleMap(
-                            onMapCreated: _onMapCreated,
-                            initialCameraPosition: CameraPosition(
-                              target: _center,
-                              zoom: 15.0,
-                            ),
-                            markers: _markers,
-                            onCameraMove: _onCameraMove,
-                            //mapType: _currentMapType,
+                          child:
+                          GoogleMap(
+//                            onMapCreated: _onMapCreated,
+//                            myLocationEnabled: true,
+                            initialCameraPosition:
+                            CameraPosition(target: _geoLocCoordinates,zoom: 15.0),
+                            markers: markers,
                             compassEnabled: true,
-                          ),
-                        ),
-                        SizedBox(
-                          height: 20,),
-                        Text("House Name and No:",style: TextStyle(fontSize: 18.0),),
-                        TextField(
-                          controller: strHouseNameNo,
-                          decoration: InputDecoration(
-                              hintText: 'house name and no'
-                          ),
-                        ),
+                             onCameraMove: _onCameraMove,
+                          )
+//                           GoogleMap(
+//                             onMapCreated: _onMapCreated,
+//                             initialCameraPosition: CameraPosition(
+//                               target: _center,
+//                               zoom: 15.0,
+//                             ),
+//                             markers: _markers,
+//                             onCameraMove: _onCameraMove,
+//                             //mapType: _currentMapType,
+//                             compassEnabled: true,
+//                           ),
+                         ),
                         SizedBox(
                           height: 20,),
                         //////////////////////
@@ -1117,16 +1239,43 @@ class ListViewActivity extends State<LaundryTab> {
                         ),
                         SizedBox(
                           height: 20,),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            //style: ,
-                            onPressed: () {
-                              senddata();
-                              },
-                            child: const Text('COMPLETE REQUEST'),
+                        ListTile(
+                          title:Text("Specific address/house:",style: TextStyle(fontSize: 18.0),),
+                       ),
+                        ListTile(
+                            title:TextField(
+                          controller: strHouseNameNo,
+                          decoration: InputDecoration(
+                              hintText: 'enter a house name and no'
                           ),
-                          // child: Text("widget"),
+                        ),
+                        ),
+                        SizedBox(
+                          height: 20,),
+
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          //alignment: Alignment.center,
+                          child: new MaterialButton(
+                            child: setUpButtonChild(),
+                            onPressed: () async {
+                              senddata();
+                              setState(() {
+                                _state = 0;
+//                if (_state == 0) {
+                                animateButton();
+                                //            }
+
+                              });
+                            },
+                            elevation: 4.0,
+                            minWidth: double.infinity,
+                            height: 48.0,
+                            color: Colors.cyan,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30)),
+
+                          ),
                         ),
                         SizedBox(
                           height: 20,
@@ -1137,11 +1286,19 @@ class ListViewActivity extends State<LaundryTab> {
               )
           );
         }
+        );
+    Marker resultMarker = Marker(
+      markerId: MarkerId(_geoLocCoordinates.toString()),
+      infoWindow: InfoWindow(
+          title: "Selected Location",
+          snippet: strLocAddress),
+      icon: BitmapDescriptor.defaultMarker,
+      position: _geoLocCoordinates,
     );
-    //;})
-    //);
-    _onAddMarkerButtonPressed(_currentMapPosition);
+// Add it to Set
+    markers.add(resultMarker);
 
+//    getLoginUserData();
   }
 
 }
