@@ -11,6 +11,7 @@ import 'package:http/http.dart' as http;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../main.dart';
 import 'package:flushbar/flushbar.dart';
+import 'package:share/share.dart';
 
 class ActivityPage extends StatefulWidget {
 
@@ -133,48 +134,14 @@ class ListViewActivity extends State<ActivityPage> {
           );
         });
   }
-
-  final lstNotificationTitles = [
-    "HM2563CD55",
-    "HM6527LY33",
-    "HM3965LY87",
-    "Easter Holiday",
-    "HM9978LY12",
-    "New service",
-    "App Update",
-    "HM0165CN00",
-    "HM7841CG99"
-  ];
-  final lstNotificationSubtitles = [
-    "You have created a new laundry order",
-    "Your laundry order has been completed successfully, please proceed to the tickets page and complete payment",
-    "Your invoice for this order has been generated successfully click on the more button to see the detailed break down",
-    "Greetings from Homlie, We sincerely wish you a merry easter holiday as we celebrate the salvatio  of our Lord Jesus",
-    "A service request has been generated for this order.",
-    "Our esteemed client, we are happy to introduce to you the new integrated carpet cleaning as a service for your home cleaning.",
-    "Hello there, we have a new update to our app version 4.1.2, feel motivated to access more features visible through this new update from playstore",
-    "The ticket above was successfully edited, and a number of items added",
-    "This is your first ticket, If you experience any challenges, please let us know or you can directly call us via the folliwing phone numnbers: +254713593916 or +254775961581"
-  ];
-  final lstNotificationColors = [
+ final lstNotificationColors = [
     Colors.lightBlue,
     Colors.green,
     Colors.yellow,
     Colors.red,
     Colors.purple
   ];
-  final lstNotifMoreVisibility = [
-    true,
-    true,
-    true,
-    false,
-    true,
-    false,
-    false,
-    true,
-    true
-  ];
-/////////////////////////////sglite functions
+ /////////////////////////////sglite functions
 
   ////////////////////////////////
   /// Get all users using raw query
@@ -194,38 +161,6 @@ class ListViewActivity extends State<ActivityPage> {
     strLUUserEmail=result[0]["email"].toString();
     return result;
   }
-
-  // Map<List, dynamic> _loggedinuserdetails = {
-  // "responseBody": [
-  // {
-  //   "svc_id": 107,
-  //   "svc_article": "Curtain blinder",
-  //   "svc_demographic": "misc",
-  //   "svc_type": "Laundry",
-  // }
-  // ],
-  // };
-  // [
-  //   {
-  //     fuid: eZkylUGfTWuFCjPD6AzIVU:APA91bEihci2qZC4AZeB3mwiOSrSrlw05JRUT3JkCCjwq67kGY6NoDttUOh0XRfCD2nwVWGUW4zHSBqwGRk9AGczljTRwiUS5Zrhi0yUa2LBEBCp0yNpHWnJ9fcXK3LhbhWhL5yDmZum,
-  //     email: clarenznet@gmail.com,
-  //     phonenumber: +254713593916,
-  //     generallocation: Kiambu County,Ruiru,A2,,A2,,Embu - Nairobi Highway,Embu - Nairobi Highway,
-  //     latlongaddress: LatLng(-1.132274809333934, 36.97678327560425)
-  //   }
-  //   ]
-  // Future getLoginUserData() async {
-  //   var dbClient = await SqliteDB().db;
-  //   final res = await dbClient.rawQuery("SELECT * FROM loginUser");
-  //   Flushbar(
-  //     title: "Logged In User Info",
-  //     message: ""+res.toString(),
-  //     duration: Duration(seconds: 10),
-  //     isDismissible: false,
-  //   )
-  //     ..show(context);
-  //   return res;
-  // }
 
   /// Simple query with WHERE raw query
   Future getAdults() async {
@@ -248,34 +183,6 @@ class ListViewActivity extends State<ActivityPage> {
     final res = await dbClient.query('User');
     return res;
   }
-
-
-  /// Simple query with sqflite helper
-  // Future getAdultsUsingHelper() async {
-  //   var dbClient = await SqliteDB().db;
-  //   final res = await dbClient.query('User',
-  //       columns: ['id', 'name'],
-  //       where: '$age > ?',
-  //       whereArgs: [18]);
-  //   return res;
-  // }
-//////////
-  /// Update using raw query
-  /// example :-
-  /// var newAge = 28
-  /// var id = "johndoe"
-
-  /// Update using sqflite helper
-  /// newData example :-
-  /// var newData = {"id": "johndoe92", "name": "John Doe", "email":"abc@example.com", "age": 28}
-  // Future updateUsingHelper(newData) async {
-  //   var dbClient = await SqliteDB().db;
-  //   var res = await dbClient.update('User',newData,
-  //       where: '$id = ?', whereArgs: [newData['id']]);
-  //   return res;
-  // }
-  ///////
-
   /// Delete data using raw query
   Future delete(id) async {
     var dbClient = await SqliteDB().db;
@@ -318,24 +225,17 @@ class ListViewActivity extends State<ActivityPage> {
     });
    var url = 'https://homlie.co.ke/malakane_init/hml_getnotifications.php?struseremail=';
    var response = await http.get(Uri.parse(url+strLUUserEmail));
-
-//    var url = 'https://homlie.co.ke/malakane_init/hml_getnotifications.php';
-  //  var response = await http.get(url);
     debugPrint("RESULTNET>>" + response.body);
-    ///////////
-    //return json.decode(response.body);
     final db = await SqliteDB().db;
     db.delete("User2");
     createUserTable();
     var notifs = json.decode(response.body);
     putUsers(notifs);
-
     setState(() {
       isLoading = false;
 //      setState(() => user = _user);
     });
   }
-
   /// Creates user Table
   Future createUserTable() async {
     var dbClient = await SqliteDB().db;
@@ -353,16 +253,152 @@ class ListViewActivity extends State<ActivityPage> {
       )""");
     return res;
   }
+  Future getMenuData() async {
+    setState(() {
+      isLoading = true;
+    });
+    var url = 'https://homlie.co.ke/malakane_init/hml_getlaundryitems.php';
+    var response = await http.get(Uri.parse(url));
+    debugPrint("MainMenuy1" + response.body);
+//    List<dynamic> ret = json.decode(response.body);
+  //  List<Map<String, dynamic>> _servicesMenu = ret.map((value) => value as Map<String, dynamic>).toList();
+    Map<String, dynamic> _servicesMenu = json.decode(response.body);//await http.get(Uri.parse(url));
+ //   Map<String, dynamic> ret = json.decode(response.toString());
+    debugPrint("MainMenuy2" + response.body);
+    final db = await SqliteDB().db;
+    db.delete("LaundryMenu");
+    createLaundryMenuTable();
+    var laundries = _servicesMenu['laundry'];
+    debugPrint("MainMenuy3" + laundries.toString());
+    putLaundryMenu(laundries);
 
+    db.delete("CookingMenu");
+    createCookingMenuTable();
+    var cookings = _servicesMenu['cooking'];
+    debugPrint("MainMenuy4" + cookings.toString());
+    putCookingMenu(cookings);
 
+    db.delete("CleaningMenu");
+    createCleaningMenuTable();
+    var cleanings = _servicesMenu['cleaning'];
+    debugPrint("MainMenuy5" + cleanings.toString());
+    putCleaningMenu(cleanings);
+
+    setState(() {
+      isLoading = false;
+//      setState(() => user = _user);
+    });
+  }
+  /// Creates user Table
+  Future createLaundryMenuTable() async {
+    var dbClient = await SqliteDB().db;
+    var res = await dbClient.execute("""
+      CREATE TABLE LaundryMenu(
+        svc_id INTEGER PRIMARY KEY,
+        svc_article TEXT,
+        svc_demographic TEXT,
+        svc_type TEXT,
+        svc_price INTEGER,
+        svc_noitemselected INTEGER,
+        svc_articleiconurl TEXT,
+        svc_status TEXT,
+        svc_createdat TEXT,
+        svc_updatedat TEXT
+        
+      )""");
+    return res;
+  }
+  /////////////////////
+  /// Batch insert data
+  /// example:-
+  /// var users = [{"id": "johndoe92", "name": "", "email": "", "age": 25}, {"id": "paul", "name": "", "email": "", "age": 22}]
+  Future putLaundryMenu(laundries) async {
+    final dbClient = await SqliteDB().db;
+    /// Initialize batch
+    final batch = dbClient.batch();
+    /// Batch insert
+    for (var i = 0; i < laundries.length; i++) {
+      batch.insert("LaundryMenu", laundries[i]);
+    }
+    /// Commit
+    await batch.commit(noResult: true);
+    return "success";
+  }
+  /// Creates user Table
+  Future createCookingMenuTable() async {
+    var dbClient = await SqliteDB().db;
+    var res = await dbClient.execute("""
+      CREATE TABLE CookingMenu(
+        ckng_id INTEGER PRIMARY KEY,
+        svc_id TEXT,
+        svc_article TEXT,
+        svc_demographic TEXT,
+        svc_type TEXT,
+        svc_price INTEGER,
+        svc_noitemselected INTEGER,
+        svc_articleiconurl TEXT,
+        svc_status TEXT,
+        svc_createdat TEXT,
+        svc_updatedat TEXT
+        
+      )""");
+    return res;
+  }
+  /////////////////////
+  Future putCookingMenu(cookings) async {
+    final dbClient = await SqliteDB().db;
+    /// Initialize batch
+    final batch = dbClient.batch();
+    /// Batch insert
+    for (var i = 0; i < cookings.length; i++) {
+      batch.insert("CookingMenu", cookings[i]);
+    }
+    /// Commit
+    await batch.commit(noResult: true);
+    return "success";
+  }
+  /// Creates user Table
+  Future createCleaningMenuTable() async {
+    var dbClient = await SqliteDB().db;
+    var res = await dbClient.execute("""
+      CREATE TABLE CleaningMenu(
+        clng_id INTEGER PRIMARY KEY,
+        svc_id TEXT,
+        svc_article TEXT,
+        svc_demographic TEXT,
+        svc_type TEXT,
+        svc_price INTEGER,
+        svc_noitemselected INTEGER,
+        svc_articleiconurl TEXT,
+        svc_status TEXT,
+        svc_createdat TEXT,
+        svc_updatedat TEXT
+        
+      )""");
+    return res;
+  }
+  /////////////////////
+  Future putCleaningMenu(cleanings) async {
+    final dbClient = await SqliteDB().db;
+    /// Initialize batch
+    final batch = dbClient.batch();
+    /// Batch insert
+    for (var i = 0; i < cleanings.length; i++) {
+      batch.insert("CleaningMenu", cleanings[i]);
+    }
+    /// Commit
+    await batch.commit(noResult: true);
+    return "success";
+  }
 // void test = SqliteDB().test();
   String strNoOfNotifs="";
   @override
   void initState() {
-    super.initState();
     getLoginUserData();
     getData();
+    getMenuData();
 //    update("Murera","5090","1");
+    super.initState();
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _refreshIndicatorKey.currentState.show());
     getMessage();
@@ -383,18 +419,20 @@ class ListViewActivity extends State<ActivityPage> {
     // var notifs =[{"notif_id":590,"user_phonenumber":254775961581,"user_email":"clarenznet@gmail.com","notif_title":"New ticket created.","notif_body":"Laundry request uploaded","notif_metadata":null,"notif_requestid":"AREIPPH","notif_color":0,"notif_time":"2021-05-29 18:17:02"}];
     //debugPrint("sqlite" + users.toString());
   }
-
+  final String _content =
+      'You can get you laundry done, food cooked and even house space cleaned using Homlie services app on play store.';
+  void _shareContent() {
+    Share.share(_content);
+  }
   //////////////////////////////////////////
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
   GlobalKey<RefreshIndicatorState>();
-  //
   @override
   Widget build(BuildContext context) {
     var rng = new math.Random.secure();
     return Scaffold(
         body :WillPopScope(
             onWillPop: _onBackPressed,
-
             child:  RefreshIndicator(
                 key: _refreshIndicatorKey,
                 onRefresh: getData,
@@ -428,8 +466,9 @@ class ListViewActivity extends State<ActivityPage> {
                                   //color: Colors.lightBlue,
 
                                     onSelected: (value) {
-                                      if (value==3)  _logout();
+                                      if (value==3) _logout();
                                       debugPrint("RPressed>>" + value.toString());
+                                      if (value==2) _shareContent();
                                     },
                                     itemBuilder: (context) => [
                                       PopupMenuItem(
@@ -502,7 +541,7 @@ class ListViewActivity extends State<ActivityPage> {
                                           return Card(
                                             //                        elevation: 5,
                                             //shape: Border(right: BorderSide(color: Colors.red, width: 5)),
-                                            elevation: 2,
+                                            elevation: 1,
                                             child: ClipPath(
                                               child: Container(
                                                   height: 100,
@@ -616,30 +655,16 @@ class ListViewActivity extends State<ActivityPage> {
                               )
                                   : Center(
                                   child: CircularProgressIndicator());
-
-
                             }
                         )
 
-                        ///////////////redfgvvvv
-
-                        ///////////
-
-
-
-
-
                       ]),
                     )
-
-                  ////////////////////////////////////
 
                 )
 
             )
         )
-
-
     );
 
   }

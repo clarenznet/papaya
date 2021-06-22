@@ -406,7 +406,7 @@ class _SignUpPageState extends State<SignUpPage> {
         (PhoneAuthCredential phoneAuthCredential) async {
       await _auth.signInWithCredential(phoneAuthCredential);
       showSnackbar("Phone number automatically verified and user signed in: ${_auth.currentUser.uid}");
-      putLoginUser(strFuid,_emailController.text,_auth.currentUser.phoneNumber,"","");
+      putLoginUser(strFuid,_emailController.text,_auth.currentUser.phoneNumber,"","-1.38893, 35.8421");
       Navigator.pushAndRemoveUntil<dynamic>(
         context,
         MaterialPageRoute<dynamic>(
@@ -468,7 +468,7 @@ class _SignUpPageState extends State<SignUpPage> {
               (
               route) => false, //if you want to disable back feature set to false
         );
-        putLoginUser(strFuid,_emailController.text,user.phoneNumber,"","");
+        putLoginUser(strFuid,_emailController.text,user.phoneNumber,"","-1.38893, 35.8421");
       }
     } catch (e) {
       showSnackbar("Failed to sign in: " + e.toString());

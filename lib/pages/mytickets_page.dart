@@ -177,11 +177,18 @@ class ListViewActivity extends State<MyTicketsPage> {
                                                                             index]
                                                                         [
                                                                         'fr_funditype'] ==
-                                                                    "Chef services"
+                                                                    "Cooking"
                                                                 ? Colors
                                                                     .deepPurpleAccent
-                                                                : Colors
-                                                                    .lightGreen,
+                                                                :lstMyTicketsData[
+                                                        index]
+                                                        [
+                                                        'fr_funditype'] ==
+                                                            "Cleaning"
+                                                            ? Colors
+                                                            .lightGreen
+                                                            : Colors
+                                                                    .cyan,
                                                       ),
                                                       width: 70.0,
                                                       height: 80.0,
@@ -391,7 +398,8 @@ class ListViewActivity extends State<MyTicketsPage> {
                 );
               },
             )
-                    : CircularProgressIndicator();
+                    : Center(
+                    child: CircularProgressIndicator());
               })
     )
     );
