@@ -324,6 +324,7 @@ class ListViewActivity extends State<ActivityPage> {
     await batch.commit(noResult: true);
     return "success";
   }
+
   /// Creates user Table
   Future createCookingMenuTable() async {
     var dbClient = await SqliteDB().db;
