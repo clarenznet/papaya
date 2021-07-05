@@ -14,13 +14,6 @@ import 'package:flushbar/flushbar.dart';
 import 'package:share/share.dart';
 
 class ActivityPage extends StatefulWidget {
-
-  //ActivityPage() : super();
-
-//  final FirebaseUser user;
-
-  //ActivityPage({this.user}) : super();
-
   @override
   ListViewActivity createState() {
     return new ListViewActivity();
@@ -36,12 +29,6 @@ class ListViewActivity extends State<ActivityPage> {
     _firebaseMessaging.getToken().then((token) => print(token));
   }
 
-  // @override
-  // void initState() {
-  //   // TODO: implement initState
-  //   super.initState();
-  // }
-
   void getMessage(){
     _firebaseMessaging.configure(
         onMessage: (Map<String, dynamic> message) async {
@@ -55,14 +42,8 @@ class ListViewActivity extends State<ActivityPage> {
       setState(() => _message = message["notification"]["title"]);
     });
   }
-
-
-
 /////////////////////////////////////////////////
   var isLoading = false;
-  //final FirebaseUser user;
-
-//  ListViewActivity({this.user});
   FirebaseAuth _auth = FirebaseAuth.instance;
 
   signOut() async {
@@ -83,25 +64,6 @@ class ListViewActivity extends State<ActivityPage> {
           (route) => false,//if you want to disable back feature set to false
     );
   }
-  // Future<void> _logout() async {
-  //   try {
-  //     await FirebaseAuth.instance.signOut();
-  //   } catch (e) {
-  //     print(e.toString());
-  //   }
-  // }
-  // AboutListTile(
-  // icon: Icon(Icons.info,),
-  // child: Text('About app'),
-  // applicationIcon: Icon(Icons.local_play,),
-  // applicationName: 'My Cool App',
-  // applicationVersion: '1.0.25',
-  // applicationLegalese: '© 2019 Company',
-  // aboutBoxChildren: [
-  // ///Content goes here...
-  // ],
-  // )
-  //
   final titles = ["Laundry ticket", "First ticket", "Welcome to Homlie"];
   final subtitles = [
     "Hi, you created a laundry ticket 10 minutes ago, currently all our workers are engaged and will be ready to work on your order after 20 minutes, please bear with us as we currently have a high volume of inflows",
@@ -198,23 +160,16 @@ class ListViewActivity extends State<ActivityPage> {
     return res;
   }
   /////////////////////
-  /// Batch insert data
-  /// example:-
-  /// var users = [{"id": "johndoe92", "name": "", "email": "", "age": 25}, {"id": "paul", "name": "", "email": "", "age": 22}]
   Future putUsers(users) async {
     final dbClient = await SqliteDB().db;
-
     /// Initialize batch
     final batch = dbClient.batch();
-
     /// Batch insert
     for (var i = 0; i < users.length; i++) {
       batch.insert("User2", users[i]);
     }
-
     /// Commit
     await batch.commit(noResult: true);
-
     return "success";
   }
 
@@ -415,10 +370,6 @@ class ListViewActivity extends State<ActivityPage> {
       print(msg);
       return;
     });
-    // var users = [{"id": "1", "name": "johndoe", "email": "johndoe@gmail.com", "age": 25}, {"id": "2", "name": "Paul", "email": "paul2@gmail.com", "age": 22}];
-    // putUsers(users);
-    // var notifs =[{"notif_id":590,"user_phonenumber":254775961581,"user_email":"clarenznet@gmail.com","notif_title":"New ticket created.","notif_body":"Laundry request uploaded","notif_metadata":null,"notif_requestid":"AREIPPH","notif_color":0,"notif_time":"2021-05-29 18:17:02"}];
-    //debugPrint("sqlite" + users.toString());
   }
   final String _content =
       'You can get you laundry done, food cooked and even house space cleaned using Homlie services app on play store.';
@@ -495,13 +446,6 @@ class ListViewActivity extends State<ActivityPage> {
                                             ],
                                           )),
                                     ]),
-                                // child: Icon(
-                                //   Icons.more_vert,
-                                //   size: 28,
-                                //   color: Colors.lightBlue,
-                                //
-                                // ),
-
                               ),
                               strokeWidth: 1,
                               dashPattern: [3, 4]),
@@ -527,21 +471,13 @@ class ListViewActivity extends State<ActivityPage> {
                                   return Container(
                                       child: ListView.builder(
                                         itemCount: snapshot.data.length,
-                                        // itemBuilder: (context,index){
-                                        //   itemCount: lstNotificationTitles.length,
                                         shrinkWrap: true,
                                         //physics: PageScrollPhysics(), // this is what you are looking for
                                         scrollDirection: Axis.vertical,
                                         physics:NeverScrollableScrollPhysics(),
-//                                        scrollDirection: Axis.vertical,
-                                        //NeverScrollableScrollPhysics()                             //height: double.infinity,
-
                                         itemBuilder:
                                             (BuildContext context, int index) {
-//                                          List lstNotificationsData = snapshot.data;
                                           return Card(
-                                            //                        elevation: 5,
-                                            //shape: Border(right: BorderSide(color: Colors.red, width: 5)),
                                             elevation: 1,
                                             child: ClipPath(
                                               child: Container(
@@ -549,14 +485,10 @@ class ListViewActivity extends State<ActivityPage> {
                                                   decoration: BoxDecoration(
                                                       border: Border(
                                                           left: BorderSide(
-
-                                                            //color:lstNotificationColors[rng.nextInt(4)],
                                                               color: lstNotificationColors[
                                                               lstNotificationsData[
                                                               index][
                                                               'notif_color']],
-                                                              //color: lstNotificationsData[index]['notif_color']==null? Colors.blue[400]:
-                                                              //lstNotificationsData[index]['notif_color']==2? Colors.blue[100]: Colors.grey,
                                                               width: 5))),
                                                   child: ListTile(
                                                     title: Row(
@@ -646,9 +578,6 @@ class ListViewActivity extends State<ActivityPage> {
                                           );
                                         },
                                       )
-
-                                    //////////////////////swiperefesg closses
-
                                   );
                                   //////////
                                   /////

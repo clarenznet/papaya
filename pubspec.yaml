@@ -53,6 +53,7 @@ dependencies:
   sms_autofill: ^1.2.6
   firebase_messaging: ^5.0.4
   share: ^0.6.5+4
+  flutter_rating_bar:
 dev_dependencies:
   flutter_test:
     sdk: flutter

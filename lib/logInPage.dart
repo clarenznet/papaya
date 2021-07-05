@@ -8,6 +8,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:papaya/services/initialize_sqlite.dart';
 import 'package:flushbar/flushbar.dart';
 import 'dart:async';
+import 'package:http/http.dart' as http;
+
 class LogInPage extends StatefulWidget {
   LogInPage({Key key, this.title}) : super(key: key);
 
@@ -35,21 +37,9 @@ class _LogInPageState extends State<LogInPage> {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   _register() async {
     String strToken ="";
-
-    //    _firebaseMessaging.getToken().then(
-    //          (token) =>print("TOKEN HERE >"+token));
-
     _firebaseMessaging.getToken().then((token) {
       strToken = token.toString();
-      // do whatever you want with the token here
-      // Flushbar(
-      //   title: "FUID messaging",
-      //   message: ""+strToken,
-      //   duration: Duration(seconds: 3),
-      //   isDismissible: false,
-      // )
-      //   ..show(context);
-      setState(() {
+       setState(() {
         strFuid=strToken;
       });
       setUser();
@@ -80,40 +70,12 @@ class _LogInPageState extends State<LogInPage> {
     final res = await dbClient.query('User');
     return res;
   }
-
-
-  /// Simple query with sqflite helper
-  // Future getAdultsUsingHelper() async {
-  //   var dbClient = await SqliteDB().db;
-  //   final res = await dbClient.query('User',
-  //       columns: ['id', 'name'],
-  //       where: '$age > ?',
-  //       whereArgs: [18]);
-  //   return res;
-  // }
-//////////
-  /// Update using raw query
-  /// example :-
-  /// var newAge = 28
-  /// var id = "johndoe"
   Future update(newAge, id) async {
     var dbClient = await SqliteDB().db;
     var res = await dbClient.rawQuery(""" UPDATE User 
         SET age = newAge WHERE id = '$id'; """);
     return res;
   }
-
-  /// Update using sqflite helper
-  /// newData example :-
-  /// var newData = {"id": "johndoe92", "name": "John Doe", "email":"abc@example.com", "age": 28}
-  // Future updateUsingHelper(newData) async {
-  //   var dbClient = await SqliteDB().db;
-  //   var res = await dbClient.update('User',newData,
-  //       where: '$id = ?', whereArgs: [newData['id']]);
-  //   return res;
-  // }
-  ///////
-
   /// Delete data using raw query
   Future delete(id) async {
     var dbClient = await SqliteDB().db;
@@ -128,9 +90,6 @@ class _LogInPageState extends State<LogInPage> {
     var res = await dbClient.delete('User', where: 'id = ?', whereArgs: [id]);
     return res;
   }
-
-  //////login sAVE
-
   /// Creates user Table
   Future createLoginUserTable() async {
     var dbClient = await SqliteDB().db;
@@ -145,11 +104,6 @@ class _LogInPageState extends State<LogInPage> {
       )""");
     return res;
   }
-  // generallocation TEXT,
-  // latlongaddress TEXT
-
-  /// Add user to the table
-  //Future putLoginUser(String strSfuid,String strSemail,String strSphonenumber) async {
   Future putLoginUser(String strSfuid,String strSemail,String strSphonenumber,String strSgeneralLocation,String strSlatlongaddress) async {
     /// User data
     dynamic loginuser = {
@@ -165,9 +119,6 @@ class _LogInPageState extends State<LogInPage> {
     int res = await dbClient.insert("loginUser", loginuser);
     return res;
   }
-
-
-
   @override
   void initState() {
     super.initState();
@@ -182,11 +133,7 @@ class _LogInPageState extends State<LogInPage> {
 
   @override
   Widget build(BuildContext context) {
-    // sharedPrefInit();
-    // putString("MS_UID", "QWERTYUIOP");
-    // debugPrint("tutI" + getString("MS_UID").toString());
-//    getString("MS_UID");
-    return Scaffold(
+   return Scaffold(
       key: _scaffoldKey,
       resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
@@ -232,9 +179,6 @@ class _LogInPageState extends State<LogInPage> {
                       hintStyle: new TextStyle(color: Colors.grey[800]),
                       hintText: "Enter your email address",
                       fillColor: Colors.white70),
-                  // onChanged: (value) {
-                  //  strEmail = value;
-                  // },
                 ),
 
               ),),
@@ -294,7 +238,7 @@ class _LogInPageState extends State<LogInPage> {
                 child: new MaterialButton(
                   child: setUpButtonChild(),
                   onPressed: () async {
-                    verifyPhoneNumber();
+                    sendSignInData();
                     setState(() {
                       _state = 0;
 //                if (_state == 0) {
@@ -457,13 +401,12 @@ class _LogInPageState extends State<LogInPage> {
       });
     });
   }
-
   void verifyPhoneNumber() async {
     PhoneVerificationCompleted verificationCompleted =
         (PhoneAuthCredential phoneAuthCredential) async {
       await _auth.signInWithCredential(phoneAuthCredential);
       showSnackbar("Phone number automatically verified and user signed in: ${_auth.currentUser.uid}");
-      putLoginUser(strFuid,_emailController.text,_auth.currentUser.phoneNumber,"","-1.38893, 35.8421");
+      putLoginUser(strFuid,_emailController.text,_auth.currentUser.phoneNumber,"","0.0,0.0");
 //      putLoginUser(strFuid,_emailController.text,_auth.currentUser.phoneNumber,"hjghhj2","hgj");
       Navigator.pushAndRemoveUntil<dynamic>(
         context,
@@ -525,7 +468,7 @@ class _LogInPageState extends State<LogInPage> {
           ),
               (route) => false,//if you want to disable back feature set to false
         );
-        putLoginUser(strFuid,_emailController.text,user.phoneNumber,"","-1.38893, 35.8421");
+        putLoginUser(strFuid,_emailController.text,user.phoneNumber,"","0.0,0.0");
       }
 
     } catch (e) {
@@ -534,5 +477,65 @@ class _LogInPageState extends State<LogInPage> {
   }
   void showSnackbar(String message) {
     _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(message)));
+  }
+  ///////////////////////////// send sign in data
+  /////////
+  Future<String> sendSignInData() async {
+    String strReturn = "";
+    String strUserSignEmail=_emailController.text;
+    String strUserSignPhoneNumber=_phoneNumberController.text;
+
+    if (strUserSignEmail.length < 6 ||
+        strUserSignEmail.isEmpty ||
+        strUserSignEmail == "") {
+      Flushbar(
+        title: "Invalid email.",
+        message: "Please enter a valid email.",
+        duration: Duration(seconds: 3),
+        isDismissible: false,
+      )..show(context);
+    }
+    if (strUserSignPhoneNumber.length < 13 ||
+        strUserSignPhoneNumber.isEmpty ||
+        strUserSignPhoneNumber == "") {
+      Flushbar(
+        title: "Invalid phonenumber.",
+        message: "Please enter a valid phone number starting with +254XXXXXXXXX",
+        duration: Duration(seconds: 3),
+        isDismissible: false,
+      )..show(context);
+    }
+    if (strUserSignPhoneNumber.isNotEmpty &&
+        strUserSignEmail.isNotEmpty) {
+      var urlPost = 'https://homlie.co.ke/malakane_init/hml_signup.php';
+      final strResponse = await http.post(Uri.parse(urlPost), body: {
+        "hml_userphone": strUserSignPhoneNumber,
+        "hml_email": strUserSignEmail,
+        "hml_notiftoken": strFuid,
+        "hml_rqsttype": "Login",
+      });
+      print(strResponse.body.toString());
+      if (strResponse.body.toString().trim() == 'Success') {
+        Flushbar(
+          title: "Sign Up",
+          message:
+          "Your log in is successfull, proceeding to verify your account details.",
+          duration: Duration(seconds: 3),
+          isDismissible: false,
+        )..show(context);
+        verifyPhoneNumber();
+      } else {
+        Flushbar(
+          title: "Log in error: "+strResponse.body.toString(),
+          message: "Error. Please try again or check your email address, if you dont have an account with us please go to sign up page.",
+          duration: Duration(seconds: 5),
+          isDismissible: false,
+        )..show(context);
+
+      }
+      debugPrint("|||" + strResponse.body.toString());
+      strReturn = strResponse.body.toString();
+    }
+    return strReturn;
   }
 }

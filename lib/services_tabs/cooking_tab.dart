@@ -2,6 +2,7 @@
 
 import 'dart:ffi';
 import 'dart:ui';
+import 'package:papaya/screens/details_screen.dart';
 import 'package:papaya/services/initialize_sqlite.dart';
 import 'package:flutter/material.dart';
 import 'package:papaya/const/_const.dart';
@@ -80,406 +81,31 @@ class ListViewActivity extends State<CookingTab> {
     // }
     return ret;
   }
-
-  Map<String, dynamic> _laundries = {
-    "responseCode": "1",
-    "responseText": "List categories.",
-    "responseBody": [
-      {
-        "svc_id": 107,
-        "svc_article": "Curtain blinder",
-        "svc_demographic": "misc",
-        "svc_type": "Laundry",
-        "svc_price": 20,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Curtainblindermisc.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:50:06",
-        "svc_updatedat": "2020-11-26 12:50:06"
-      },
-      {
-        "svc_id": 106,
-        "svc_article": "Heavy curtain ",
-        "svc_demographic": "misc",
-        "svc_type": "Laundry",
-        "svc_price": 30,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Heavycurtainmisc.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:49:03",
-        "svc_updatedat": "2020-11-26 12:49:03"
-      },
-      {
-        "svc_id": 104,
-        "svc_article": "Blanket",
-        "svc_demographic": "misc",
-        "svc_type": "Laundry",
-        "svc_price": 100,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Blanketmisc.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:46:57",
-        "svc_updatedat": "2020-11-26 12:46:57"
-      },
-      {
-        "svc_id": 103,
-        "svc_article": "Pillow case",
-        "svc_demographic": "misc",
-        "svc_type": "Laundry",
-        "svc_price": 5,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Pillowcasemisc.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:46:25",
-        "svc_updatedat": "2020-11-26 12:46:25"
-      },
-      {
-        "svc_id": 102,
-        "svc_article": "Bed sheet",
-        "svc_demographic": "misc",
-        "svc_type": "Laundry",
-        "svc_price": 30,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Bedsheetmisc.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:45:24",
-        "svc_updatedat": "2020-11-26 12:45:24"
-      },
-      {
-        "svc_id": 101,
-        "svc_article": "Vest",
-        "svc_demographic": "mens",
-        "svc_type": "Laundry",
-        "svc_price": 10,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Vestmens.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:44:28",
-        "svc_updatedat": "2020-11-26 12:44:28"
-      },
-      {
-        "svc_id": 100,
-        "svc_article": "Pair of socks",
-        "svc_demographic": "unisex",
-        "svc_type": "Laundry",
-        "svc_price": 5,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Pairofsocksunisex.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:42:15",
-        "svc_updatedat": "2020-11-26 12:42:15"
-      },
-      {
-        "svc_id": 99,
-        "svc_article": "Heavy jacket",
-        "svc_demographic": "ladies",
-        "svc_type": "Laundry",
-        "svc_price": 40,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Heavyjacketladies.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:41:01",
-        "svc_updatedat": "2020-11-26 12:41:01"
-      },
-      {
-        "svc_id": 98,
-        "svc_article": "Heavy jacket",
-        "svc_demographic": "mens",
-        "svc_type": "Laundry",
-        "svc_price": 40,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Heavyjacketmens.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:40:25",
-        "svc_updatedat": "2020-11-26 12:40:25"
-      },
-      {
-        "svc_id": 97,
-        "svc_article": "Light jacket\/coat",
-        "svc_demographic": "ladies",
-        "svc_type": "Laundry",
-        "svc_price": 25,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Lightjacket\/coatladies.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:39:18",
-        "svc_updatedat": "2020-11-26 12:39:18"
-      },
-      {
-        "svc_id": 96,
-        "svc_article": "Light jacket\/coat",
-        "svc_demographic": "mens",
-        "svc_type": "Laundry",
-        "svc_price": 25,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Lightjacket\/coatmens.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:38:23",
-        "svc_updatedat": "2020-11-26 12:38:23"
-      },
-      {
-        "svc_id": 95,
-        "svc_article": "Jeans skirt",
-        "svc_demographic": "ladies",
-        "svc_type": "Laundry",
-        "svc_price": 20,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Jeansskirtladies.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:37:25",
-        "svc_updatedat": "2020-11-26 12:37:25"
-      },
-      {
-        "svc_id": 94,
-        "svc_article": "Jeans trouser",
-        "svc_demographic": "ladies",
-        "svc_type": "Laundry",
-        "svc_price": 30,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Jeanstrouserladies.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:36:37",
-        "svc_updatedat": "2020-11-26 12:36:37"
-      },
-      {
-        "svc_id": 93,
-        "svc_article": "Jeans trouser",
-        "svc_demographic": "mens",
-        "svc_type": "Laundry",
-        "svc_price": 30,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Jeanstrousermens.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:35:30",
-        "svc_updatedat": "2020-11-26 12:35:30"
-      },
-      {
-        "svc_id": 92,
-        "svc_article": "Jeans shirt",
-        "svc_demographic": "ladies",
-        "svc_type": "Laundry",
-        "svc_price": 25,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Jeansshirtladies.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:34:14",
-        "svc_updatedat": "2020-11-26 12:34:14"
-      },
-      {
-        "svc_id": 91,
-        "svc_article": "Jeans shirt",
-        "svc_demographic": "mens",
-        "svc_type": "Laundry",
-        "svc_price": 25,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Jeansshirtmens.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:33:25",
-        "svc_updatedat": "2020-11-26 12:33:25"
-      },
-      {
-        "svc_id": 90,
-        "svc_article": "Sweater",
-        "svc_demographic": "mens",
-        "svc_type": "Laundry",
-        "svc_price": 25,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Sweatermens.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:30:28",
-        "svc_updatedat": "2020-11-26 12:30:28"
-      },
-      {
-        "svc_id": 89,
-        "svc_article": "Sweater",
-        "svc_demographic": "ladies",
-        "svc_type": "Laundry",
-        "svc_price": 25,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Sweaterladies.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:29:54",
-        "svc_updatedat": "2020-11-26 12:29:54"
-      },
-      {
-        "svc_id": 88,
-        "svc_article": "Cotton shirt",
-        "svc_demographic": "ladies",
-        "svc_type": "Laundry",
-        "svc_price": 15,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Cottonshirtladies.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:22:51",
-        "svc_updatedat": "2020-11-26 12:22:51"
-      },
-      {
-        "svc_id": 87,
-        "svc_article": "Ankara trouser",
-        "svc_demographic": "mens",
-        "svc_type": "Laundry",
-        "svc_price": 20,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Ankaratrousermens.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:21:39",
-        "svc_updatedat": "2020-11-26 12:21:39"
-      },
-      {
-        "svc_id": 86,
-        "svc_article": "Ankara top",
-        "svc_demographic": "ladies",
-        "svc_type": "Laundry",
-        "svc_price": 15,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Ankaratopladies.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:20:03",
-        "svc_updatedat": "2020-11-26 12:20:03"
-      },
-      {
-        "svc_id": 85,
-        "svc_article": "Cotton trouser",
-        "svc_demographic": "mens",
-        "svc_type": "Laundry",
-        "svc_price": 20,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Cottontrousermens.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:19:19",
-        "svc_updatedat": "2020-11-26 12:19:19"
-      },
-      {
-        "svc_id": 84,
-        "svc_article": "Khaki trouser",
-        "svc_demographic": "mens",
-        "svc_type": "Laundry",
-        "svc_price": 20,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Khakitrousermens.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:16:40",
-        "svc_updatedat": "2020-11-26 12:16:40"
-      },
-      {
-        "svc_id": 81,
-        "svc_article": "Khaki trouser",
-        "svc_demographic": "ladies",
-        "svc_type": "Laundry",
-        "svc_price": 20,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Khakitrouser.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 12:04:14",
-        "svc_updatedat": "2020-11-26 12:04:14"
-      },
-      {
-        "svc_id": 79,
-        "svc_article": "Dress",
-        "svc_demographic": "ladies",
-        "svc_type": "Laundry",
-        "svc_price": 20,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Dress.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 11:57:38",
-        "svc_updatedat": "2020-11-26 11:57:38"
-      },
-      {
-        "svc_id": 77,
-        "svc_article": "Ankara trouser",
-        "svc_demographic": "ladies",
-        "svc_type": "Laundry",
-        "svc_price": 20,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Ankaratrouser.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 11:54:00",
-        "svc_updatedat": "2020-11-26 11:54:00"
-      },
-      {
-        "svc_id": 75,
-        "svc_article": "Cotton shirt",
-        "svc_demographic": "mens",
-        "svc_type": "Laundry",
-        "svc_price": 15,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Cottonshirt.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 11:47:45",
-        "svc_updatedat": "2020-11-26 11:47:45"
-      },
-      {
-        "svc_id": 74,
-        "svc_article": "Cotton trouser",
-        "svc_demographic": "ladies",
-        "svc_type": "Laundry",
-        "svc_price": 20,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Cottontrouser.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 11:45:18",
-        "svc_updatedat": "2020-11-26 11:45:18"
-      },
-      {
-        "svc_id": 66,
-        "svc_article": "Blouse",
-        "svc_demographic": "ladies",
-        "svc_type": "Laundry",
-        "svc_price": 15,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Blouse.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 11:27:11",
-        "svc_updatedat": "2020-11-26 11:27:11"
-      },
-      {
-        "svc_id": 65,
-        "svc_article": "T shirt",
-        "svc_demographic": "unisex",
-        "svc_type": "Laundry",
-        "svc_price": 15,
-        "svc_noitemselected": 0,
-        "svc_articleiconurl":
-        "https:\/\/www.homlie.instrov.com\/uploads\/serviceitem_icons\/Tshirt.png",
-        "svc_status": 1,
-        "svc_createdat": "2020-11-26 11:25:28",
-        "svc_updatedat": "2020-11-26 11:25:28"
-      }
-    ],
-    "responseTotalResult":
-    3 // Total result is 3 here becasue we have 3 categories in responseBody.
-  };
-
+  ///////////////////////////////////back button
+  Future<bool> _onBackPressed() {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Confirm action!'),
+            content: Text('Are you sure you want to exit the application?'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('NO'),
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+              ),
+              FlatButton(
+                child: Text('YES'),
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+              ),
+            ],
+          );
+        });
+  }
 ////////////////////////////////////////////////////////////////////////////////
   var lstSelectedRawData = new Map();
   List lstRawData = [];
@@ -516,7 +142,9 @@ class ListViewActivity extends State<CookingTab> {
   Widget build(BuildContext context) {
     var rng = new math.Random.secure();
     return Scaffold(
-        body: Container(
+        body :WillPopScope(
+            onWillPop: _onBackPressed,
+            child:  Container(
             color: Colors.deepPurpleAccent,
             //padding: new EdgeInsets.all(10.0),
             padding:
@@ -702,7 +330,7 @@ class ListViewActivity extends State<CookingTab> {
                                                 height:
                                                 double.infinity,
                                                 child: Image.asset(
-                                                    'assets/images/s1.jpg'),
+                                                    'assets/images/s2.jpg'),
                                               );
                                             },
                                             placeholder: AssetImage(
@@ -908,7 +536,8 @@ class ListViewActivity extends State<CookingTab> {
                   })
                       :  Center(
                       child: CircularProgressIndicator());
-                })));
+                })))        )
+    ;
   }
 
   void changedDropDownItem(String selectedCity) {
@@ -952,8 +581,23 @@ class ListViewActivity extends State<CookingTab> {
       strUserLat = llat.toString();
       strUserLong = llong.toString();
       _geoLocCoordinates = new LatLng(llat, llong);
+      if (llat!=0 && llong!=0) {
+        geoAddress();
+      }
     });
-    List<geocode.Placemark> placemarks = await geocode.placemarkFromCoordinates(
+
+    // Flushbar(
+    //   title: "Location",
+    //   message: _geoLocCoordinates.toString(),
+    //   duration: Duration(seconds: 3),
+    //   isDismissible: false,
+    // )..show(context);
+//    return result;
+    _show(context);
+  }
+  void geoAddress()async{
+    List<geocode.Placemark> placemarks = await geocode
+        .placemarkFromCoordinates(
         _geoLocCoordinates.latitude, _geoLocCoordinates.longitude);
     setState(() {
       strLocAddress = placemarks.first.administrativeArea +
@@ -973,15 +617,6 @@ class ListViewActivity extends State<CookingTab> {
           placemarks.first.name;
       debugPrint("addreesee111:>" + placemarks.toString());
     });
-
-    Flushbar(
-      title: "Location",
-      message: _geoLocCoordinates.toString(),
-      duration: Duration(seconds: 3),
-      isDismissible: false,
-    )..show(context);
-//    return result;
-    _show(context);
   }
 
   void _show(BuildContext ctx) {
@@ -1131,19 +766,13 @@ class ListViewActivity extends State<CookingTab> {
     /////////
     Future<String> senddata() async {
       String strReturn = "";
-      var list = lstSelectedArticles;
-      var concatenate = StringBuffer();
-      list.forEach((item) {
-        concatenate.write(item);
-      });
+      String strSelArtBn="";
+      for (int r=0;r<lstSelectedArticles.length;r++){
+//       strSelArt=strSelArt+lstSelectedArticles[r].toString()+"\n\n";
+        strSelArtBn=strSelArtBn+lstSelectedArticles[r]['svc_article']+ "("+ lstSelectedArticles[r]['svc_demographic']+") @ KSh: "+lstSelectedArticles[r]['svc_price'].toString()+"x"+lstSelectedRawData[lstSelectedArticles[r]['svc_id']].toString()+"\n\n";
+      }
+      debugPrint("strupload2>>>>" + strSelArtBn);
       String strFr_taskdate = selectedDate.toLocal().toString().split(' ')[0];
-      print(concatenate); // displays 'onetwothree'
-      // debugPrint("fr_generallocation" +strLocAddress);
-      // debugPrint("fr_specificaddress" +strHouseNameNo.text);
-      // debugPrint("fr_taskdate" +strFr_taskdate);
-      // debugPrint("fr_tasktime" +time.toString());
-      // debugPrint("fr_taskdetail" +concatenate.toString());
-      // debugPrint("fr_strtotalprice" +intTotalPrice.toString());
 
       if (strLocAddress.isEmpty) {
         Flushbar(
@@ -1165,7 +794,7 @@ class ListViewActivity extends State<CookingTab> {
           isDismissible: false,
         )..show(context);
       }
-      if (concatenate.toString().isEmpty || concatenate.toString() == "") {
+      if (strSelArtBn.isEmpty || strSelArtBn == "") {
         Flushbar(
           title: "No Laundry items selected.",
           message: "Please choose a number of laundary items",
@@ -1173,9 +802,9 @@ class ListViewActivity extends State<CookingTab> {
           isDismissible: false,
         )..show(context);
       }
-      if (concatenate.toString().isNotEmpty &&
-          concatenate.toString() != "" &&
-          strHouseNameNo.text.length > 3 &&
+      if (strSelArtBn.isNotEmpty &&
+          strSelArtBn != "" &&
+          strHouseNameNo.text.length >= 2 &&
           strHouseNameNo.text.isNotEmpty &&
           strHouseNameNo.text != "" &&
           strLocAddress.isNotEmpty) {
@@ -1190,7 +819,7 @@ class ListViewActivity extends State<CookingTab> {
           "fr_specificaddress": strHouseNameNo.text,
           "fr_taskdate": strFr_taskdate,
           "fr_tasktime": time.hour.toString() + ":" + time.minute.toString(),
-          "fr_taskdetail": concatenate.toString(),
+          "fr_taskdetail": strSelArtBn,
           "fr_strtotalprice": intTotalPrice.toString(),
         });
         print(strResponse.body.toString());
@@ -1212,6 +841,11 @@ class ListViewActivity extends State<CookingTab> {
             duration: Duration(seconds: 3),
             isDismissible: false,
           )..show(context);
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => DetailsScreen(strResponse.body.toString())));
+
         }
         debugPrint("|||" + strResponse.body.toString());
         strReturn = strResponse.body.toString();

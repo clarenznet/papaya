@@ -331,7 +331,7 @@ class ListViewActivity extends State<CleaningTab> {
                                                 height:
                                                 double.infinity,
                                                 child: Image.asset(
-                                                    'assets/images/s1.jpg'),
+                                                    'assets/images/s3.jpg'),
                                               );
                                             },
                                             placeholder: AssetImage(
@@ -585,12 +585,12 @@ class ListViewActivity extends State<CleaningTab> {
         geoAddress();
       }
     });
-    Flushbar(
-      title: "Location",
-      message: _geoLocCoordinates.toString(),
-      duration: Duration(seconds: 3),
-      isDismissible: false,
-    )..show(context);
+    // Flushbar(
+    //   title: "Location",
+    //   message: _geoLocCoordinates.toString(),
+    //   duration: Duration(seconds: 3),
+    //   isDismissible: false,
+    // )..show(context);
 //    return result;
     _show(context);
   }

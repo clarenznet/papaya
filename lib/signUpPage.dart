@@ -9,6 +9,8 @@ import 'package:flushbar/flushbar.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:papaya/services/initialize_sqlite.dart';
 import 'dart:async';
+import 'package:http/http.dart' as http;
+
 class SignUpPage extends StatefulWidget {
   SignUpPage({Key key, this.title}) : super(key: key);
 
@@ -237,7 +239,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                   child: setUpButtonChild(),
                   onPressed: () async {
-                    verifyPhoneNumber();
+                    sendSignInData();
                     setState(() {
                       _state = 0;
 //                if (_state == 0) {
@@ -406,7 +408,7 @@ class _SignUpPageState extends State<SignUpPage> {
         (PhoneAuthCredential phoneAuthCredential) async {
       await _auth.signInWithCredential(phoneAuthCredential);
       showSnackbar("Phone number automatically verified and user signed in: ${_auth.currentUser.uid}");
-      putLoginUser(strFuid,_emailController.text,_auth.currentUser.phoneNumber,"","-1.38893, 35.8421");
+      putLoginUser(strFuid,_emailController.text,_auth.currentUser.phoneNumber,"","0.0,0.0");
       Navigator.pushAndRemoveUntil<dynamic>(
         context,
         MaterialPageRoute<dynamic>(
@@ -468,7 +470,7 @@ class _SignUpPageState extends State<SignUpPage> {
               (
               route) => false, //if you want to disable back feature set to false
         );
-        putLoginUser(strFuid,_emailController.text,user.phoneNumber,"","-1.38893, 35.8421");
+        putLoginUser(strFuid,_emailController.text,user.phoneNumber,"","0.0,0.0");
       }
     } catch (e) {
       showSnackbar("Failed to sign in: " + e.toString());
@@ -477,4 +479,81 @@ class _SignUpPageState extends State<SignUpPage> {
   void showSnackbar(String message) {
     _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(message)));
   }
+
+  ///////////////////////////// send sign in data
+  /////////
+  Future<String> sendSignInData() async {
+    String strReturn = "";
+    String strUserSignName=_nameController.text;
+    String strUserSignEmail=_emailController.text;
+    String strUserSignPhoneNumber=_phoneNumberController.text;
+
+    if (strUserSignName.length < 3 ||
+        strUserSignName.isEmpty ||
+        strUserSignName == "") {
+      Flushbar(
+        title: "Invalid Name",
+        message:
+        "Please enter your first and last name.",
+        duration: Duration(seconds: 3),
+        isDismissible: false,
+      )..show(context);
+    }
+
+    if (strUserSignEmail.length < 6 ||
+        strUserSignEmail.isEmpty ||
+        strUserSignEmail == "") {
+      Flushbar(
+        title: "Invalid email.",
+        message: "Please enter a valid email.",
+        duration: Duration(seconds: 3),
+        isDismissible: false,
+      )..show(context);
+    }
+    if (strUserSignPhoneNumber.length < 13 ||
+        strUserSignPhoneNumber.isEmpty ||
+        strUserSignPhoneNumber == "") {
+      Flushbar(
+        title: "Invalid phonenumber.",
+        message: "Please enter a valid phone number starting with +254XXXXXXXXX",
+        duration: Duration(seconds: 3),
+        isDismissible: false,
+      )..show(context);
+    }
+    if (strUserSignName.isNotEmpty &&
+        strUserSignPhoneNumber.isNotEmpty &&
+        strUserSignEmail.isNotEmpty) {
+      var urlPost = 'https://homlie.co.ke/malakane_init/hml_signup.php';
+      final strResponse = await http.post(Uri.parse(urlPost), body: {
+        "hml_username": strUserSignName,
+        "hml_userphone": strUserSignPhoneNumber,
+        "hml_email": strUserSignEmail,
+        "hml_notiftoken": strFuid,
+        "hml_rqsttype": "Signup",
+      });
+      print(strResponse.body.toString());
+      if (strResponse.body.toString().trim() == 'Success') {
+        Flushbar(
+          title: "Sign Up",
+          message:
+          "Your sign up is successfull, proceeding to verify your account details.",
+          duration: Duration(seconds: 3),
+          isDismissible: false,
+        )..show(context);
+        verifyPhoneNumber();
+      } else {
+        Flushbar(
+          title: "Sign up error: "+strResponse.body.toString(),
+          message: "Error. Please try again or check your email address, if you already have an account use the login page.",
+          duration: Duration(seconds: 5),
+          isDismissible: false,
+        )..show(context);
+
+      }
+      debugPrint("|||" + strResponse.body.toString());
+      strReturn = strResponse.body.toString();
+    }
+    return strReturn;
+  }
+
 }
