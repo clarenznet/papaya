@@ -11,6 +11,7 @@ import 'package:papaya/widgets/heading.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart' as geocode;
 import 'package:flushbar/flushbar.dart';
+import 'package:papaya/services/initialize_sqlite.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 class DetailsScreen extends StatefulWidget {
   final String strTcktCode; //if you have multiple values add here
@@ -34,7 +35,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
     Navigator.pop(context);
   }
 
-  Future<void> lipaNaMpesa() async {
+  Future<void> lipaNaMpesa(double _Amount,String strPhonenumber,String strAccRefer,String strTransDesc) async {
     dynamic transactionInitialisation;
     debugPrint("RES__>" + transactionInitialisation.toString());
     try {
@@ -43,16 +44,16 @@ class _DetailsScreenState extends State<DetailsScreen> {
           await MpesaFlutterPlugin.initializeMpesaSTKPush(
               businessShortCode: "504628",
               //transactionType: TransactionType.CustomerBuyGoodsOnline,
-              amount: 7,
-              partyA: "254713593916",
+              amount: _Amount,
+              partyA: strPhonenumber,
               partyB: "507984",
               callBackURL: Uri.parse(
-                  "https://www.homlie.co.ke/aqim/callback_url.php?strticketcode=56"),
-              accountReference: "HM8799",
-              phoneNumber: "254713593916",
+                  "https://www.homlie.co.ke/aqim/callback_url.php?strticketcode="+strAccRefer),
+              accountReference: strAccRefer,
+              phoneNumber: strPhonenumber,
               baseUri: Uri.parse("https://api.safaricom.co.ke"),
               //baseUrl: "https://sandbox.safaricom.co.ke/",
-              transactionDesc: "purchase",
+              transactionDesc: strTransDesc,
               passKey:
                   "ba95f91d4c495092444e625821fb00cc5eec70f8a4d64c0fdc95f8c23b501283");
       print("TRANSACTION RESULT: " + transactionInitialisation.toString());
@@ -144,7 +145,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
   }
 
   var lstItemsDetails = new Map();
-String strTotalAmountUpl="";
+String strTotalAmountUpl="",strUserPhoneNoUpl="",strUserEmailUpl="",strRatingUpl="";
+TextEditingController _paymentPhonenumberController = TextEditingController();
+  bool _isTextFieldPhonenumberEnable = false;
+  bool blVerificationCode=true;
+
   @override
   Widget build(BuildContext context) {
 //    debugPrint("SECRET_API>>>>" +secret.toString());
@@ -193,6 +198,17 @@ String strTotalAmountUpl="";
                         position: _geoLocCoordinates,
                       );
 // Add it to Set
+//                 if (
+//                 lstDetails[0]["fr_status"].toString().trim()=="Waiting") {
+//
+//                       Flushbar(
+//                         title: "Agent matching.",
+//                         message:
+//                         "please wait a moment for us to assign an agent to your work.",
+//                         duration: Duration(seconds: 3),
+//                         isDismissible: false,
+//                       )..show(context);
+//                 }
                 markers.add(resultMarker);
                 // lstItemsDetails=lstDetails[0]["fr_taskdetail"] as Map;
 //      lstDetails[0]["fr_taskdetail"]
@@ -204,7 +220,7 @@ String strTotalAmountUpl="";
                 scrollDirection: Axis.vertical,
 
 
-                child:                Column(
+                child:  Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           SizedBox(
@@ -350,8 +366,12 @@ String strTotalAmountUpl="";
 
 
                           ),
+                          Visibility(
+                            //blVerificationCode == true
 
-                          Column(
+                          visible: lstDetails[0]["fr_status"].toString().trim()=="Waiting" ? false
+                                : true,
+                          child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
@@ -417,21 +437,25 @@ String strTotalAmountUpl="";
                                 SizedBox(
                                   height: 20,
                                 ),
-                              ]),
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            //alignment: Alignment.center,
+                              ]),            ),
+                          Visibility(
+                            //blVerificationCode == true
 
+                            visible: lstDetails[0]["fr_status"].toString().trim()=="Waiting" ? false
+                                : true,
+
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
                             child: new MaterialButton(
-                              child: setUpButtonChild(),
-                              onPressed: () async {
-                                _show(context);
-                                setState(() {
-                                  _button_state = 0;
-//                if (_state == 0) {
-                                  animateButton();
-                                  //            }
-                                });
+                               child: Text(
+                                  " Complete Ticket ",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16.0,
+                                  ),
+                                ),
+                                onPressed: () async {
+                                getLoginUserData();
                               },
                               elevation: 4.0,
                               minWidth: double.infinity,
@@ -440,7 +464,7 @@ String strTotalAmountUpl="";
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(30)),
                             ),
-                          ),
+                          ),),
                         ],
                 )
                       );
@@ -452,93 +476,83 @@ String strTotalAmountUpl="";
     );
   }
 
-  Widget setUpButtonChild() {
-    if (_button_state == 0) {
-      return new Text(
-        " Complete Ticket ",
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16.0,
-        ),
-      );
-    } else if (_button_state == 1) {
-      return CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-      );
-    } else {
-      return Text(
-        "       Retry      ",
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16.0,
-        ),
-      );
-    }
-  }
-
-  void animateButton() {
+  Future getLoginUserData() async {
+    var dbClient = await SqliteDB().db;
+    //final res = await dbClient.rawQuery("SELECT fuid,email FROM loginUser");
+    final res = await dbClient.rawQuery(
+        "SELECT fuid,email, phonenumber,generallocation,latlongaddress FROM loginUser");
+    List<Map> result = await dbClient.rawQuery(
+        "SELECT fuid,email, phonenumber,generallocation,latlongaddress FROM loginUser");
+    debugPrint("|||Logged in user" + result[0]["latlongaddress"].toString());
+/////
     setState(() {
-      _button_state = 1;
-    });
+      strUserEmailUpl = result[0]["email"].toString();
+      strUserPhoneNoUpl = result[0]["phonenumber"].toString();
+      _paymentPhonenumberController.text=strUserPhoneNoUpl.replaceAll(new RegExp(r'[^\w\s]+'),'');//replaceAll("[^0-9]+","");//replaceAll("[\\D]", "");
 
-    Timer(Duration(milliseconds: 3300), () {
-      setState(() {
-        _button_state = 2;
-      });
     });
-    Timer(Duration(milliseconds: 15000), () {
-      setState(() {
-        _button_state = 0;
-      });
-    });
+    _show(context);
   }
-  void _show(BuildContext ctx) {
 
+  void _show(BuildContext ctx) {
     int intTotalPrice = 0;
     int _state = 0;
     String strReturn = "";
-    String strRating="";
 ///////////////////////
-    TextEditingController strHouseNameNo = new TextEditingController();
     /////////
-    Future<String> senddata() async {
-      if ( strHouseNameNo.text.isNotEmpty &&
-          strHouseNameNo.text != "" &&
-          strLocAddress.isNotEmpty) {
-        var urlPost = 'https://homlie.co.ke/malakane_init/hml_uploadticket.php';
+    Future<String> completeTicket() async {
+      if (_paymentPhonenumberController.text.isEmpty ||_paymentPhonenumberController.text.length<10 || _paymentPhonenumberController.text.length>12) {
+        Flushbar(
+          title: "Invalid phonenumber use formart: 254XXXXXXXXX",
+          message:
+          "Please check your payment phone number and try again.",
+          duration: Duration(seconds: 3),
+          isDismissible: false,
+        )..show(context);
+      }
+
+      if ( _paymentPhonenumberController.text.isNotEmpty &&
+          _paymentPhonenumberController.text != ""
+          ) {
+        var urlPost = 'https://homlie.co.ke/malakane_init/hml_completeticket.php';
         final strResponse = await http.post(Uri.parse(urlPost), body: {
-          "fr_useremail": "", //fr_useremail,
-          "fr_userphone": "", //fr_userphone",
-          "fr_rating": "Laundry", //fr_funditype",
-          "fr_paymentphonenumber": strLocAddress,
-          "fr_ticketno": "",
-          // "fr_tasktime": time.hour.toString() + ":" + time.minute.toString(),
-          // "fr_taskdetail": strSelArtBn,
-          // "fr_strtotalprice": intTotalPrice.toString(),
+          // "fr_useremail": strUserEmailUpl, //fr_useremail,
+          // "fr_userphone": strUserPhoneNoUpl, //fr_userphone",
+          "uppymnt_rating": strRatingUpl, //fr_funditype",
+          "uppymnt_phonenumber": _paymentPhonenumberController.text,
+          "uppymnt_ticketno": widget.strTcktCode,
+          "uppymnt_invoicetotal": strTotalAmountUpl,
         });
         print(strResponse.body.toString());
-        if (strResponse.body.toString() == "ErrorRE101") {
-          ////
-     //     snackbarA("Error, please try again");
+        if (strResponse.body.toString() == "Error") {
           Flushbar(
             title: "Ticket",
             message: "Error. Please try again.",
             duration: Duration(seconds: 3),
             isDismissible: false,
           )..show(context);
-        } else {
+        } else if(strResponse.body.toString().trim()=="Success") {
           Navigator.pop(context);
           Flushbar(
             title: "Ticket",
             message:
-            "Your ticket has been created successfully. You can find it in MyTickets tab",
+            "please wait for mpesa STK pop up and enter your pin to complete payment.",
             duration: Duration(seconds: 3),
             isDismissible: false,
           )..show(context);
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => DetailsScreen(strResponse.body.toString())));
+          double _Amount=double.parse(strTotalAmountUpl);
+          lipaNaMpesa(_Amount,_paymentPhonenumberController.text, widget.strTcktCode, "Homlie ticket");
+
+        }
+        else{
+          Flushbar(
+            title: "Error",
+            message:
+            "please try again later or contact support desk.",
+            duration: Duration(seconds: 3),
+            isDismissible: false,
+          )..show(context);
+
         }
         debugPrint("|||" + strResponse.body.toString());
         strReturn = strResponse.body.toString();
@@ -583,11 +597,16 @@ String strTotalAmountUpl="";
         });
       });
     }
+    void enableTextField(){
+
+      setState(() { _isTextFieldPhonenumberEnable = true; });
+      Navigator.of(context).pop();
+      _show(context);
+
+    }
 
 ////////////////////////////////////////////////////////////////
-//   getLoginUserData();
 
-    //  getLoginUserData();
     showModalBottomSheet(
         isScrollControlled: true,
 //        height: 10,
@@ -652,24 +671,46 @@ String strTotalAmountUpl="";
                       style: TextStyle(
                           fontSize: 21, fontWeight: FontWeight.w500,color: Colors.grey[500]),
                     ),
-                    title: Text(
-                      "+254713593916",
-                      style: TextStyle(
-                          fontSize: 21, fontWeight: FontWeight.w500),
+                    title:
+                    TextField(
+                      enabled: _isTextFieldPhonenumberEnable,
+                      // focusNode: FocusNode(),
+                      // enableInteractiveSelection: false,
+                      controller: _paymentPhonenumberController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                          labelText: "lipa na mpesa phonenumber",
+                          border: new OutlineInputBorder(
+                            borderRadius: const BorderRadius.all(
+                              const Radius.circular(10),
+                            ),
+                          ),
+                          filled: true,
+                          hintStyle: new TextStyle(fontSize: 14, color: Colors.grey[800]),
+                          hintText: "formart: 254X XXXX XXXX",
+                          fillColor: Colors.white70),
                     ),
+                    trailing:
+                    IconButton(
+                      icon: Icon(
+                        Icons.edit,
+                      ),
+                      iconSize: 30,
+                      color: Colors.lightBlue,
+                      splashColor: Colors.purple,
+                      onPressed: () {
+                        enableTextField();
+
+                      },
+
+                    ),
+
                   ),
                   ListTile(
                     leading:Text(
-                      "Take a moment and rate our agent: ",
+                      "Take a moment and rate our agent ",
                       style: TextStyle(
                           fontSize: 21, fontWeight: FontWeight.w500,color: Colors.grey[500]),
-                    ),
-                    title:
-
-                    Text(
-                      strRating,
-                      style: TextStyle(
-                          fontSize: 21, fontWeight: FontWeight.w500),
                     ),
                   ),
                   SizedBox(
@@ -677,7 +718,7 @@ String strTotalAmountUpl="";
                   ),
             RatingBar.builder(
               initialRating: 3,
-              minRating: 1,
+              minRating: 0.5,
               direction: Axis.horizontal,
               allowHalfRating: true,
               itemCount: 5,
@@ -690,9 +731,17 @@ String strTotalAmountUpl="";
               onRatingUpdate: (rating) {
                 print(rating);
                 setState(() {
-                  strRating=rating.toString();
-                });
+                  strRatingUpl=rating.toString();
+                  // Flushbar(
+                  //   title: "Rating",
+                  //   message:
+                  //   strRatingUpl,
+                  //   duration: Duration(seconds: 1),
+                  //   isDismissible: false,
+                  // )..show(context);
+                  //
 
+                });
               },
             ),
                   SizedBox(
@@ -703,9 +752,7 @@ String strTotalAmountUpl="";
                           child: new MaterialButton(
                             child: setUpButtonChild(),
                             onPressed: () async {
-                              senddata();
-//                              lipaNaMpesa();
-
+                              completeTicket();
                               setState(() {
                                 _state = 0;
 //                if (_state == 0) {
@@ -727,5 +774,6 @@ String strTotalAmountUpl="";
             ]
               ));
         });
+
   }
 }
