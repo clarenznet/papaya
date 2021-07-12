@@ -93,13 +93,107 @@ class _SignUpPageState extends State<SignUpPage> {
     return res;
   }
 
+  Flushbar flushbar;
+
+  //
+  TextEditingController _controller = TextEditingController();
+  Flushbar<List<String>> flushbar2;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  Form userInputForm;
+  String inputVal = '';
+
+  TextFormField getFormField() {
+    return TextFormField(
+      controller: _controller,
+      initialValue: null,
+      style: TextStyle(color: Colors.white),
+      maxLength: 100,
+      maxLines: 1,
+      decoration: InputDecoration(
+        fillColor: Colors.white12,
+        filled: true,
+        icon: Icon(
+          Icons.label,
+          color: Colors.green,
+        ),
+        border: UnderlineInputBorder(),
+        helperText: 'Enter Email to recover or edit your phone number.',
+        helperStyle: TextStyle(color: Colors.grey),
+        labelText: 'Type your email address',
+        labelStyle: TextStyle(color: Colors.grey),
+      ),
+    );
+  }
+
+  withInputField(BuildContext context) async {
+    flushbar2 = Flushbar<List<String>>(
+      flushbarPosition: FlushbarPosition.BOTTOM,
+      flushbarStyle: FlushbarStyle.GROUNDED,
+      reverseAnimationCurve: Curves.decelerate,
+      forwardAnimationCurve: Curves.elasticIn,
+      userInputForm: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            getFormField(),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Padding(
+                padding: EdgeInsets.all(20.0),
+                child: FlatButton(
+                  child: Text('SEND'),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                  color: Colors.white,
+                  textColor: Colors.red,
+                  padding: EdgeInsets.all(6.0),
+                  onPressed: () {
+                    flushbar2.dismiss([_controller.text, ' World']);
+                    sendRecoverData(_controller.text);
+                  },
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Padding(
+                padding: EdgeInsets.all(20.0),
+                child: FlatButton(
+                  child: Text('DISMISS'),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                  color: Colors.white,
+                  textColor: Colors.red,
+                  padding: EdgeInsets.all(6.0),
+                  onPressed: () {
+                    flushbar2.dismiss([_controller.text, ' World']);
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    )..show(context).then((result) {
+      if (null != result) {
+        String userInput1 = result[0];
+        String userInput2 = result[1];
+        setState(() {
+          inputVal = userInput1 + userInput2;
+        });
+      }
+    });
+  }
 
 
   @override
   void initState() {
     super.initState();
     _register();
-
   }
   Future setUser() async {
     final db = await SqliteDB().db;
@@ -111,7 +205,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -341,7 +435,55 @@ class _SignUpPageState extends State<SignUpPage> {
                     },
                     child: Text("Verify")),
               ),),
+            SizedBox(
+              height: 30,
+            ),
 
+      Visibility(
+        visible: blVerificationCode == true
+            ? false
+            : true,
+             child:Text(
+              'Forgot your details?',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+              ),
+
+            ),
+      ),
+      Visibility(
+        visible: blVerificationCode == true
+            ? false
+            : true,
+            child:Align(
+                alignment: Alignment.bottomCenter,
+                child:InkWell(
+                  child: Text(
+                    ' Click here.',
+                    style: TextStyle(
+                      color: Colors.cyan,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+
+                  ),
+                  onTap: () => {
+                    withInputField(context)
+
+                  },
+                )
+
+              // OutlineButton(
+              //   child: Text('Forgot your details? Click here.'),
+              //   onPressed: () {
+              //     withInputField(context);
+              //   },
+              // ),
+            ),),
+            SizedBox(
+              height: 20,
+            ),
 
             // Text(
             //   authStatus == "" ? "" : authStatus,
@@ -359,10 +501,12 @@ class _SignUpPageState extends State<SignUpPage> {
   void autofillPhone ()async{
     try{
       _phoneNumberController.text = await _autoFill.hint;
-    } catch (j) {  }
-
-  }
-  Widget setUpButtonChild() {
+    } on Exception catch (exception) {
+      // only executed if error is of type Exception
+    } catch (error) {
+      // executed for errors of all types other than Exception
+    }
+  }  Widget setUpButtonChild() {
     if (_state == 0) {
       return new Text(
         "Sign up with Phone Number",
@@ -553,6 +697,47 @@ class _SignUpPageState extends State<SignUpPage> {
       debugPrint("|||" + strResponse.body.toString());
       strReturn = strResponse.body.toString();
     }
+    return strReturn;
+  }
+  ////////////////////////////////
+///////////////////////////// send sign in data
+  /////////
+  Future<String> sendRecoverData(String strEmail) async {
+    String strReturn = "";
+    if (strEmail.isNotEmpty ) {
+      var urlPost = 'https://homlie.co.ke/malakane_init/hml_recover.php';
+      final strResponse = await http.post(Uri.parse(urlPost), body: {
+        "rcvry_email": strEmail
+      });
+      print(strResponse.body.toString());
+      if (strResponse.body.toString().trim() == 'Success') {
+        Flushbar(
+          title: "Account Recovery",
+          message:
+          "Your request has been successfully received please check your email address for a response.",
+          duration: Duration(seconds: 3),
+          isDismissible: false,
+        )..show(context);
+      } else {
+        Flushbar(
+          title: "Account recovery error: "+strResponse.body.toString(),
+          message: "Error. Please try again or check your email address, if you already have an account use the login page.",
+          duration: Duration(seconds: 5),
+          isDismissible: false,
+        )..show(context);
+      }
+    }else{
+      // Flushbar(
+      //   title: "Enter a valid email address",
+      //   message:
+      //   "nhjkh",
+      //   duration: Duration(seconds: 3),
+      //   isDismissible: false,
+      // )..show(context);
+      withInputField(context);
+
+    }
+
     return strReturn;
   }
 

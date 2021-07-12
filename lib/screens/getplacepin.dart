@@ -24,7 +24,7 @@ class _GetPlacePinState extends State<GetPlacePin> {
   }
 
   GoogleMapController mapController;
-  static final LatLng _center = const LatLng(-1.28893, 36.8421);
+  static final LatLng _center = const LatLng(-1.28893, 35.8421);
   final Set<Marker> _markers = {};
   LatLng _currentMapPosition = _center;
   LatLng geoloc=null;
@@ -93,11 +93,11 @@ class _GetPlacePinState extends State<GetPlacePin> {
     mapController = controller;
   mapController.animateCamera(
     CameraUpdate.newCameraPosition(
-      CameraPosition(target: LatLng(-1.28893, 36.8421),zoom: 15),
+      CameraPosition(target: LatLng(-1.28893, 35.8421),zoom: 15),
     ),
   );
   }
-double lat=-1.28893,long=36.8421;
+double lat=-1.28893,long=35.8421;
   void showCurrentMarker(){
     getMyLoc();
     if(_markers.length>=1)
@@ -111,13 +111,23 @@ double lat=-1.28893,long=36.8421;
     }
 
   }
-  String strRawLatLong="";
+  String strRawLatLong="0.0,0.0";
   void getMyLoc()async{
+    Flushbar(
+      title: "Getting your location!",
+      message: "please wait",
+      duration: Duration(seconds: 5),
+      isDismissible: false,
+
+    )
+      ..show(context);
+
     _location.onLocationChanged.listen((LocationData currentLocation) {
       print(currentLocation.latitude);
       print(currentLocation.longitude);
       lat=currentLocation.latitude;
       long=currentLocation.longitude;
+
       strRawLatLong=currentLocation.latitude.toString()+","+currentLocation.longitude.toString();
       geoloc = new LatLng(currentLocation.latitude, currentLocation.longitude);
       debugPrint("geoloc:" + geoloc.toString());

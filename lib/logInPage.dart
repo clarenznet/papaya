@@ -135,7 +135,7 @@ class _LogInPageState extends State<LogInPage> {
   Widget build(BuildContext context) {
    return Scaffold(
       key: _scaffoldKey,
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -151,9 +151,27 @@ class _LogInPageState extends State<LogInPage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            Image.network(
-              "https://homlie.co.ke/img/favicon.png",
-              height: 150,
+              FadeInImage(
+              imageErrorBuilder:
+                  (BuildContext context,
+                  Object exception,
+                  StackTrace
+                  stackTrace) {
+                print('Error Handler');
+                return Container(
+                  width: 60,
+                   height:60,
+                  // double.infinity,
+                  child: Image.asset(
+                      'assets/images/s1.jpg'),
+                );
+              },
+              placeholder: AssetImage(
+                  'assets/images/dice_splash.gif'),
+              image: NetworkImage("https://homlie.co.ke/img/favicon.png"),
+              fit: BoxFit.cover,
+              width: 80,
+              height: 80,
             ),
             Visibility(
               visible: blVerificationCode == true
@@ -356,10 +374,14 @@ class _LogInPageState extends State<LogInPage> {
     );
   }
   void autofillPhone ()async{
+
     try{
       _phoneNumberController.text = await _autoFill.hint;
-    } catch (j) {  }
-
+    } on Exception catch (exception) {
+    // only executed if error is of type Exception
+    } catch (error) {
+     // executed for errors of all types other than Exception
+    }
   }
   Widget setUpButtonChild() {
     if (_state == 0) {

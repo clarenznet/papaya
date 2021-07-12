@@ -552,7 +552,7 @@ class ListViewActivity extends State<LaundryTab> {
 
   DateTime selectedDate = DateTime.now();
   TimeOfDay time = TimeOfDay.now();
-  String strUserslatLong = "";
+  String strUserslatLong = "0.0,0.0";
 
   // /// Simple query with WHERE raw query
   Future getLoginUserData() async {
@@ -566,51 +566,64 @@ class ListViewActivity extends State<LaundryTab> {
 /////
     setState(() {
       strUserslatLong = result[0]["latlongaddress"].toString();
-//      if (strUserslatLong=="")strUserslatLong="0,0";
-      strUserEmail = result[0]["email"].toString();
-      strUserPhoneNo = result[0]["phonenumber"].toString();
-      var vLatLong = strUserslatLong.split(',');
-      var llat = double.parse(vLatLong[0]);
-      var llong = double.parse(vLatLong[1]);
-      strUserLat = llat.toString();
-      strUserLong = llong.toString();
-      _geoLocCoordinates = new LatLng(llat, llong);
-      if (llat!=0 && llong!=0) {
-        geoAddress();
+      if (strUserslatLong==""||strUserslatLong=="0.0,0.0"||strUserslatLong==null){
+        getpinInit();
+      }else {
+        strUserEmail = result[0]["email"].toString();
+        strUserPhoneNo = result[0]["phonenumber"].toString();
+        var vLatLong = strUserslatLong.split(',');
+        var llat = double.parse(vLatLong[0]);
+        var llong = double.parse(vLatLong[1]);
+        strUserLat = llat.toString();
+        strUserLong = llong.toString();
+        _geoLocCoordinates = new LatLng(llat, llong);
+        if (llat != 0 && llong != 0) {
+          geoAddress();
+        }
+        _show(context);
+
       }
     });
+    }
 
-    // Flushbar(
-    //   title: "Location",
-    //   message: _geoLocCoordinates.toString(),
-    //   duration: Duration(seconds: 3),
-    //   isDismissible: false,
-    // )..show(context);
-//    return result;
-    _show(context);
+  void getpinInit() {
+    //// pop to remove back trace and force user to reload the bottom sheet
+//    Navigator.of(context).pop();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GetPlacePin(),
+      ),
+    );
   }
   void geoAddress()async{
-    List<geocode.Placemark> placemarks = await geocode
-        .placemarkFromCoordinates(
-        _geoLocCoordinates.latitude, _geoLocCoordinates.longitude);
-    setState(() {
-      strLocAddress = placemarks.first.administrativeArea +
-          "," +
-          placemarks.first.locality +
-          "," +
-          placemarks.first.street +
-          "," +
-          placemarks.first.subLocality +
-          "," +
-          placemarks.first.street +
-          "," +
-          placemarks.first.subThoroughfare +
-          "," +
-          placemarks.first.thoroughfare +
-          "," +
-          placemarks.first.name;
-      debugPrint("addreesee111:>" + placemarks.toString());
-    });
+    try {
+      List<geocode.Placemark> placemarks = await geocode
+          .placemarkFromCoordinates(
+          _geoLocCoordinates.latitude, _geoLocCoordinates.longitude);
+      setState(() {
+        strLocAddress = placemarks.first.administrativeArea +
+            "," +
+            placemarks.first.locality +
+            "," +
+            placemarks.first.street +
+            "," +
+            placemarks.first.subLocality +
+            "," +
+            placemarks.first.street +
+            "," +
+            placemarks.first.subThoroughfare +
+            "," +
+            placemarks.first.thoroughfare +
+            "," +
+            placemarks.first.name;
+        debugPrint("addreesee111:>" + placemarks.toString());
+      });
+    } on Exception catch (exception) {
+     // only executed if error is of type Exception
+    } catch (error) {
+     // executed for errors of all types other than Exception
+    }
   }
 
   void _show(BuildContext ctx) {

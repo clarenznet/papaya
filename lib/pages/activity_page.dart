@@ -70,7 +70,73 @@ class ListViewActivity extends State<ActivityPage> {
     "You can create your first ticket by opening the + button and just wait for the service to begin",
     "Homlie provides you with home based services curated for a cool home experience"
   ];
-
+  Flushbar flushbar;
+  custom(BuildContext context) {
+    flushbar = Flushbar(
+      title: 'Error loading data',
+      message: 'Retry?',
+      duration: Duration(seconds: 10),
+      flushbarPosition: FlushbarPosition.BOTTOM,
+      flushbarStyle: FlushbarStyle.GROUNDED,
+      reverseAnimationCurve: Curves.decelerate,
+      forwardAnimationCurve: Curves.elasticInOut,
+      backgroundColor: Colors.red,
+      boxShadows: [
+        BoxShadow(
+          color: Colors.blue[800],
+          offset: Offset(0.0, 2.0),
+          blurRadius: 3.0,
+        ),
+      ],
+      backgroundGradient: LinearGradient(
+        colors: [Colors.blueGrey, Colors.cyan],
+      ),
+      isDismissible: false,
+      icon: Icon(
+        Icons.refresh,
+        color: Colors.yellow,
+      ),
+      mainButton: FlatButton(
+        onPressed: () {
+          getData();
+          flushbar.dismiss();
+        },
+        child: Text(
+          'Retry',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+      showProgressIndicator: true,
+      progressIndicatorBackgroundColor: Colors.blueGrey,
+    )..show(context);
+  }
+  ///////////////////////////////////back button
+  Future<bool> _confirmLogOut() {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Confirm log out!'),
+            content: Text('Email:  '+ strLUUserEmail),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('NO'),
+                onPressed: () {
+                  Navigator.pop(context);
+                  //                  Navigator.of(context).pop(false);
+                },
+              ),
+              FlatButton(
+                child: Text('YES'),
+                onPressed: () {
+                  Navigator.pop(context);
+                  _logout();
+                },
+              ),
+            ],
+          );
+        });
+  }
   ///////////////////////////////////back button
   Future<bool> _onBackPressed() {
     return showDialog(
@@ -110,9 +176,15 @@ class ListViewActivity extends State<ActivityPage> {
   Future getAll() async {
     var dbClient = await SqliteDB().db;
     final res = await dbClient.rawQuery("SELECT * FROM User2 ORDER BY notif_id DESC");
-    return res;
+    if (res==null){
+  getData();
+}else{
+    setState(() {
+
+    });
+    return res;}
   }
-  String strLUUserEmail="";
+  String strLUUserEmail="",strLUUserPhoneNumber="";
   /// Simple query with WHERE raw query
   Future getLoginUserData() async {
     var dbClient = await SqliteDB().db;
@@ -120,7 +192,10 @@ class ListViewActivity extends State<ActivityPage> {
     final res = await dbClient.rawQuery("SELECT fuid,email, phonenumber,generallocation,latlongaddress FROM loginUser");
     List<Map> result = await dbClient.rawQuery("SELECT fuid,email, phonenumber,generallocation,latlongaddress FROM loginUser");
     debugPrint("|||Logged in user" + result[0]["latlongaddress"].toString());
+setState(() {
     strLUUserEmail=result[0]["email"].toString();
+    strLUUserPhoneNumber=result[0]["phonenumber"].toString();
+});
     return result;
   }
 
@@ -181,6 +256,11 @@ class ListViewActivity extends State<ActivityPage> {
    var url = 'https://homlie.co.ke/malakane_init/hml_getnotifications.php?struseremail=';
    var response = await http.get(Uri.parse(url+strLUUserEmail));
     debugPrint("RESULTNET>>" + response.body);
+
+    if (response.body.trim()=="Error"||response.body.trim()==""){
+      custom(context);
+    }else{
+
     final db = await SqliteDB().db;
     db.delete("User2");
     createUserTable();
@@ -188,8 +268,7 @@ class ListViewActivity extends State<ActivityPage> {
     putUsers(notifs);
     setState(() {
       isLoading = false;
-//      setState(() => user = _user);
-    });
+    });}
   }
   /// Creates user Table
   Future createUserTable() async {
@@ -352,8 +431,8 @@ class ListViewActivity extends State<ActivityPage> {
   void initState() {
     getLoginUserData();
     getData();
+  //  getAll();
     getMenuData();
-//    update("Murera","5090","1");
     super.initState();
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _refreshIndicatorKey.currentState.show());
@@ -418,7 +497,7 @@ class ListViewActivity extends State<ActivityPage> {
                                   //color: Colors.lightBlue,
 
                                     onSelected: (value) {
-                                      if (value==3) _logout();
+                                      if (value==3) _confirmLogOut();
                                       debugPrint("RPressed>>" + value.toString());
                                       if (value==2) _shareContent();
                                     },
@@ -459,10 +538,10 @@ class ListViewActivity extends State<ActivityPage> {
                                 color: Colors.grey[500]),
                           ),
                         ),
-                        FutureBuilder(
-                            future: getAll(),//getData(),
+                          FutureBuilder(
+                            future: getAll(),
                             builder: (context, snapshot) {
-                              if (snapshot.hasError) print(snapshot.error);
+                              if (snapshot.hasError) custom(context);
                               return snapshot.hasData
                                   ? LayoutBuilder(
                                 builder: (BuildContext context, BoxConstraints viewportConstraints) {

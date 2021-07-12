@@ -66,19 +66,24 @@ class _DetailsScreenState extends State<DetailsScreen> {
     }
   }
 
-  int _button_state = 0;
-
   Future getDetailsData(String strTcktCode) async {
+    debugPrint("started detals !!!!");
+
     var url =
         'https://homlie.co.ke/malakane_init/hml_getticketdetails.php?strtcktcode=';
     var response = await http.get(Uri.parse(url + strTcktCode));
     debugPrint("detals !!!!" + response.body);
     return json.decode(response.body);
   }
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+  GlobalKey<RefreshIndicatorState>();
 
   @override
   void initState() {
     super.initState();
+    // WidgetsBinding.instance
+    //     .addPostFrameCallback((_) => _refreshIndicatorKey.currentState.show());
+
   }
   LatLng _geoLocCoordinates; //LatLng(0.0,0.0);
 
@@ -143,6 +148,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
       debugPrint("addreesee111:>" + placemarks.toString());
     });
   }
+  refr(){
+    getDetailsData(widget.strTcktCode);
+  }
 
   var lstItemsDetails = new Map();
 String strTotalAmountUpl="",strUserPhoneNoUpl="",strUserEmailUpl="",strRatingUpl="";
@@ -170,7 +178,8 @@ TextEditingController _paymentPhonenumberController = TextEditingController();
       body: Container(
         color: Colors.white,
         alignment: Alignment.center,
-        child: FutureBuilder(
+
+    child: FutureBuilder(
             future: getDetailsData(widget.strTcktCode),
             builder: (context, snapshot) {
               if (snapshot.hasError) print(snapshot.error);
@@ -201,6 +210,13 @@ TextEditingController _paymentPhonenumberController = TextEditingController();
 //                 if (
 //                 lstDetails[0]["fr_status"].toString().trim()=="Waiting") {
 //
+//                   const oneSec = const Duration(seconds:30);
+//                   new Timer.periodic(oneSec, (t) => getDetailsData(widget.strTcktCode));
+//
+//                 }
+//                 if (t != null && lstDetails[0]["fr_status"].toString().trim()!="Waiting")t.cancel();
+
+
 //                       Flushbar(
 //                         title: "Agent matching.",
 //                         message:
@@ -235,6 +251,7 @@ TextEditingController _paymentPhonenumberController = TextEditingController();
                                   fontSize: 20, fontWeight: FontWeight.w600),
                             ),
                           ),
+
                           Container(
                               child: ListView.builder(
                                   itemCount: lstDetails.length,

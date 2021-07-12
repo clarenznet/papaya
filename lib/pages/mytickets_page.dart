@@ -6,6 +6,8 @@ import 'package:papaya/widgets/heading.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flushbar/flushbar.dart';
+
 //import 'package:papaya/widgets/progress_indicator.dart';
 
 import 'dart:math' as math;
@@ -55,6 +57,48 @@ class ListViewActivity extends State<MyTicketsPage> {
     Colors.deepPurpleAccent,
     Colors.lightGreen
   ];
+  Flushbar flushbar;
+  custom(BuildContext context) {
+    flushbar = Flushbar(
+      title: 'Error loading data',
+      message: 'Retry?',
+//      duration: Duration(seconds: 30),
+      flushbarPosition: FlushbarPosition.BOTTOM,
+      flushbarStyle: FlushbarStyle.GROUNDED,
+      reverseAnimationCurve: Curves.decelerate,
+      forwardAnimationCurve: Curves.elasticInOut,
+      backgroundColor: Colors.red,
+      boxShadows: [
+        BoxShadow(
+          color: Colors.blue[800],
+          offset: Offset(0.0, 2.0),
+          blurRadius: 3.0,
+        ),
+      ],
+      backgroundGradient: LinearGradient(
+        colors: [Colors.blueGrey, Colors.cyan],
+      ),
+      isDismissible: false,
+      icon: Icon(
+        Icons.refresh,
+        color: Colors.yellow,
+      ),
+      mainButton: FlatButton(
+        onPressed: () {
+          getData();
+          flushbar.dismiss();
+          setState(() {});
+        },
+        child: Text(
+          'Retry',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+      showProgressIndicator: true,
+      progressIndicatorBackgroundColor: Colors.blueGrey,
+    )..show(context);
+  }
+
 
   String strLUUserEmail="";
   /// Simple query with WHERE raw query
@@ -72,14 +116,23 @@ class ListViewActivity extends State<MyTicketsPage> {
   Future getData() async {
     var url = 'https://homlie.co.ke/malakane_init/hml_getmytickets.php?struseremail=';
     var response = await http.get(Uri.parse(url+strLUUserEmail));
-    debugPrint("getres" + response.body);
+    debugPrint("getresQQQ" + response.body);
+    if (response.body.trim()=="Error"){
+      custom(context);
+    }
     return json.decode(response.body);
+
   }
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+  GlobalKey<RefreshIndicatorState>();
 
   @override
   void initState() {
     super.initState();
     getLoginUserData();
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _refreshIndicatorKey.currentState.show());
+
   }
   //////////////////////////////////////////notifsa items
   @override
@@ -88,7 +141,10 @@ class ListViewActivity extends State<MyTicketsPage> {
     return Scaffold(
         body: WillPopScope(
             onWillPop: _onWillPop,
-            child: FutureBuilder(
+        child:  RefreshIndicator(
+        key: _refreshIndicatorKey,
+        onRefresh: getData,
+        child: FutureBuilder(
               future: getData(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) print(snapshot.error);
@@ -399,10 +455,19 @@ class ListViewActivity extends State<MyTicketsPage> {
               },
             )
                     : Center(
-                    child: CircularProgressIndicator());
+
+                    child:
+                    // Flushbar(
+                    //     title: "Agent matching.",
+                    //      message:
+                    //    "please wait a moment for us to assign an agent to your work.",
+                    //      duration: Duration(seconds: 10),
+                    //      isDismissible: false,
+                    //    )..show(context));
+                    CircularProgressIndicator());
               })
     )
-    );
+    ));
   }
   void detailScreen(String strTckCode){
     Navigator.push(
@@ -411,7 +476,4 @@ class ListViewActivity extends State<MyTicketsPage> {
             builder: (context) => DetailsScreen(strTckCode)));
   }
 
-}
-
-class _onBackPressed {
 }
