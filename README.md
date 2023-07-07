@@ -16,4 +16,4 @@ Custom cost calculator
 Firebase implementation-real time push notifications etc
 
 Screen shots
-![myimage-alt-tag]([url-to-image](https://github.com/clarenznet/papaya/blob/master/Screenshot_20210520-062319.jpg)https://github.com/clarenznet/papaya/blob/master/Screenshot_20210520-062319.jpg)
+![Screenshot](Screenshot_20210520-062319.jpg)
