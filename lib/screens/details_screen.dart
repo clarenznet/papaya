@@ -48,14 +48,14 @@ class _DetailsScreenState extends State<DetailsScreen> {
               partyA: strPhonenumber,
               partyB: "507984",
               callBackURL: Uri.parse(
-                  "https://www.homlie.co.ke/aqim/callback_url.php?strticketcode="+strAccRefer),
+                  ""),
               accountReference: strAccRefer,
               phoneNumber: strPhonenumber,
               baseUri: Uri.parse("https://api.safaricom.co.ke"),
               //baseUrl: "https://sandbox.safaricom.co.ke/",
               transactionDesc: strTransDesc,
               passKey:
-                  "ba95f91d4c495092444e625821fb00cc5eec70f8a4d64c0fdc95f8c23b501283");
+                  "");
       print("TRANSACTION RESULT: " + transactionInitialisation.toString());
       /*Update your db with the init data received from initialization response,
       * Remaining bit will be sent via callback url*/
