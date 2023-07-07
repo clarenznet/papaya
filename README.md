@@ -1,5 +1,7 @@
 # Homlie App
 
+### Playstore link: https://play.google.com/store/apps/details?id=com.luns.neuro.mlkn
+
 A customer facing application that allows them to schedule and request for home-based services from workers nearby the region.
 
 Three core services:
